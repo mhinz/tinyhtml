@@ -25,7 +25,7 @@ IMPORT Seq             COMPLETELY
        Dot             COMPLETELY
        Settings        COMPLETELY
        Layout          COMPLETELY
-       Types           ONLY words
+       Types           ONLY line
 
 -- GLOBAL FUNCTIONS {{{1
 
@@ -40,16 +40,17 @@ DEF sample == %(
 /*
  * Draw the display.
  */
-DEF draw(edit, passages, metr) == LET posWords == layout(passages, metr)
-                                  IN display(edit, posWords.wordsToDrawing)
+DEF draw(edit, passages, metr) == display(edit, posWords.lineToDrawing)
+    WHERE
+        posWords == layout(passages, metr)
 
 -- LOCAL FUNCTIONS {{{1
 
-FUN wordsToDrawing : words -> drawing
-DEF wordsToDrawing (<>)          == {}
-DEF wordsToDrawing (words(<>))   == {}
-DEF wordsToDrawing (words(w::W)) == wordsToDrawing(words(W)) ++ (text(w.position) with
-                                                                (text      (w.text)        ++
-                                                                 anchor    (north)         ++
-                                                                 font      (font'Settings) ++
-                                                                 foreground(foreground'Settings)))
+FUN lineToDrawing : line -> drawing
+DEF lineToDrawing (<>)         == {}
+DEF lineToDrawing (line(<>))   == {}
+DEF lineToDrawing (line(w::W)) == lineToDrawing(line(W)) ++ (text(w.position) with
+                                                            (text      (w.text)        ++
+                                                             anchor    (north)         ++
+                                                             font      (font'Settings) ++
+                                                             foreground(foreground'Settings)))

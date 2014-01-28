@@ -9,10 +9,10 @@ TYPE posWord == posWord(text     : string,
                         position : point,
                         width    : real)
 
-TYPE words == <>
-              words(data: seq[posWord])
+TYPE line == <>
+              line(data: seq[posWord])
 
-FUN <<      : words ** posWord -> words
-FUN ++      : words ** words   -> words
+FUN <<      : line ** posWord -> line
+FUN ++      : line ** line   -> line
 
-FUN flatten : seq[words] -> words
+FUN flatten : seq[line] -> line
