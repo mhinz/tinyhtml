@@ -1,5 +1,13 @@
 IMPLEMENTATION Types
 
+IMPORT Seq ONLY ::
+       Dot ONLY .
+
 DATA posWord == posWord(text     : string,
                         position : point,
                         width    : real)
+
+DATA words == words(data: seq[posWord])
+
+DEF (words(<>)) << (e) == words(e :: <>)
+DEF (w)         << (e) == words(e :: w.data)
