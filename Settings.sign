@@ -1,0 +1,19 @@
+SIGNATURE Settings
+
+IMPORT Denotation ONLY denotation
+
+IMPORT WinConfig  COMPLETELY
+
+FUN size       : size
+FUN font       : font
+FUN alignment  : denotation
+
+FUN title      : denotation
+
+FUN foreground : color
+FUN background : color
+
+FUN margin top left right : real   
+-- bottom not needed cause scrolling is deactivated
+
+FUN canvasHeight canvasWidth : real

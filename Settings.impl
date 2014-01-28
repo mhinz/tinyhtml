@@ -1,0 +1,29 @@
+IMPLEMENTATION Settings
+
+IMPORT Denotation      COMPLETELY
+       Real            COMPLETELY
+
+IMPORT WinCanvas       COMPLETELY
+       WinCanvasEditor COMPLETELY
+       WinConfig       COMPLETELY
+       WinView         COMPLETELY
+
+DEF size       == canvasWidth x canvasHeight
+DEF font       == font("lucidasanstypewriter-bold-24") -- see xfontsel / xlsfonts
+DEF alignment  == "left"
+
+DEF title      == "TinyHTML Viewer"
+
+DEF foreground == red
+DEF background == white
+
+-- RÄNDER
+DEF margin == "50" px
+
+DEF canvasWidth  == "800" px 
+DEF canvasHeight == "600" px
+
+DEF top == margin
+DEF left == margin
+DEF right == canvasWidth - margin
+-- DEF bottom == ...for scrolling etc.

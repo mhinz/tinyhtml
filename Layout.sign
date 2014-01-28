@@ -1,0 +1,11 @@
+SIGNATURE Layout
+
+IMPORT Seq            ONLY seq
+       String         ONLY string
+       Real           ONLY real
+       WinConfig      ONLY point
+       WinFontMetrics ONLY metrics
+
+       Types          ONLY posWord
+
+FUN layout : seq[seq[string]] ** metrics -> seq[posWord]

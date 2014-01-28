@@ -1,0 +1,9 @@
+SIGNATURE Types
+
+IMPORT Real      ONLY real
+       String    ONLY string
+       WinConfig ONLY point
+
+TYPE posWord == posWord(text     : string,
+                        position : point,
+                        width    : real)

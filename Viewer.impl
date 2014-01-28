@@ -1,0 +1,88 @@
+IMPLEMENTATION Viewer
+
+IMPORT BasicIO         COMPLETELY
+       Com             COMPLETELY
+       ComCompose      COMPLETELY
+       Void            COMPLETELY
+       Nat             COMPLETELY
+       NatConv         COMPLETELY
+       Real            COMPLETELY
+       Denotation      COMPLETELY
+
+IMPORT WinButton       COMPLETELY
+       WinCanvas       COMPLETELY
+       WinCanvasEditor COMPLETELY
+       WinConfig       COMPLETELY
+       WinEmitter      COMPLETELY
+       WinView         COMPLETELY
+       WinWindow       COMPLETELY
+       WinFontMetrics  COMPLETELY
+
+IMPORT Settings        COMPLETELY
+       Dot             COMPLETELY
+       Draw            COMPLETELY
+       Layout          COMPLETELY
+
+DATA gui == gui(edit : canvasEditor,
+                emit : emitter[action])
+
+-- eigentlich unnötig aber emöglicht später mehr Buttons
+-- einzubauen (was wohl nicht passieren wird ;)
+DATA action == exit
+
+/*
+ * entry point
+ */
+
+DEF viewer == initializeGui              & (\\gui.
+              setupWindow(gui)           & (\\win.
+	      fontMetrics(font'Settings) & (\\metr.
+              showText(gui, sample'Draw, metr) & -- sample contains seq[seq[string]]
+              handleEmits(gui, win))))
+
+/*
+ * GUI
+ */
+
+FUN initializeGui : com[gui]
+DEF initializeGui == canvasEditor      & (\\edit.
+                     emitter           & (\\emit.
+                     succeed(gui(edit, emit))))
+
+FUN setupWindow : gui -> com[window]
+DEF setupWindow(g) == window(frame(g))                    & (\\win.
+                      set(win, titleName(title'Settings)) & ( -- TODO: replace settings by file.title'Parser
+                      grab(win)                           &
+                      succeed(win)))
+
+FUN frame : gui -> view
+DEF frame(gui) == pad(gui.edit) ^^ exitButton(gui.emit)
+
+FUN pad : canvasEditor -> view
+DEF pad(editor) == canvas with (edit      (editor)              ++
+                                size      (size'Settings)       ++
+                                background(background'Settings) ++
+                                foreground(foreground'Settings))
+
+FUN exitButton : emitter[action] -> view
+DEF exitButton(emit) == button with (bind(emit, exit) ++
+                                     text("Beenden"))
+
+/*
+ * Use Viewer
+ */
+
+-- seq[posWord] will be replaced bei file
+-- words will be replaced by file.layout
+FUN showText : gui ** seq[seq[string]] ** metrics -> com[void]
+-- DEF showText(gui, words) == draw'Draw(gui.edit, words) 
+DEF showText(gui, passages, metr) == draw'Draw(gui.edit, passages, metr) 
+
+FUN handleEmits : gui ** window -> com[void]
+DEF handleEmits(gui, win) == await(gui.emit)   & (\\act.
+                           IF exit?(act) THEN
+                                release(win)   &
+                                delete(win)    &
+                                exit(0)
+                           FI)
+

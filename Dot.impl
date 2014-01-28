@@ -1,0 +1,3 @@
+IMPLEMENTATION Dot
+
+DEF x . f == f(x)

@@ -1,0 +1,53 @@
+IMPLEMENTATION Draw
+
+-- IMPORTS {{{1
+
+IMPORT Seq             COMPLETELY
+       SeqMap          COMPLETELY
+       Denotation      COMPLETELY
+       Com             COMPLETELY
+       Void            COMPLETELY
+       Nat             COMPLETELY
+       Real            COMPLETELY
+       String          COMPLETELY
+       RealConv        COMPLETELY
+       NatConv         COMPLETELY
+
+       ProcessArgs     COMPLETELY
+       WinButton       COMPLETELY
+       WinCanvas       COMPLETELY
+       WinCanvasEditor COMPLETELY
+       WinConfig       COMPLETELY
+       WinEmitter      COMPLETELY
+       WinWindow       COMPLETELY
+       WinView         COMPLETELY
+
+       Dot             COMPLETELY
+       Settings        COMPLETELY
+       Layout          COMPLETELY
+
+-- GLOBAL FUNCTIONS {{{1
+
+/*
+ * Example input.
+ */
+DEF sample == %(
+                %(!("Hinter"), !("dir!")                     ),
+                %(!("Ein"),    !("dreikoepfiger"), !("Affe!"))
+               )
+
+/*
+ * Draw the display.
+ */
+DEF draw(edit, passages, metr) == LET posWords == layout(passages, metr)
+                                  IN display(edit, posWords.wordsToDrawing)
+
+-- LOCAL FUNCTIONS {{{1
+
+FUN wordsToDrawing : seq[posWord] -> drawing
+DEF wordsToDrawing (<>)            == {}
+DEF wordsToDrawing (word :: words) == wordsToDrawing(words) ++ (text(word.position) with
+                                                               (text      (word.text)     ++
+                                                                anchor    (north)         ++
+                                                                font      (font'Settings) ++
+                                                                foreground(foreground'Settings)))

@@ -1,0 +1,11 @@
+SIGNATURE Draw
+
+IMPORT Com             ONLY com
+       Void            ONLY void
+       Seq             ONLY seq
+       String          ONLY string
+       WinCanvasEditor ONLY canvasEditor
+       WinFontMetrics  ONLY metrics
+
+FUN draw   : canvasEditor ** seq[seq[string]] ** metrics -> com[void]
+FUN sample : seq[seq[string]]

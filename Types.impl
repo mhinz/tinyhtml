@@ -1,0 +1,5 @@
+IMPLEMENTATION Types
+
+DATA posWord == posWord(text     : string,
+                        position : point,
+                        width    : real)
