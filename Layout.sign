@@ -6,6 +6,6 @@ IMPORT Seq            ONLY seq
        WinConfig      ONLY point
        WinFontMetrics ONLY metrics
 
-       Types          ONLY posWord
+       Types          ONLY posWord words
 
-FUN layout : seq[seq[string]] ** metrics -> seq[posWord]
+FUN layout : seq[seq[string]] ** metrics -> words

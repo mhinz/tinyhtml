@@ -21,21 +21,21 @@ IMPORT WinFontMetrics  COMPLETELY
 
        Settings        COMPLETELY
        Dot             COMPLETELY
-       Types           ONLY posWord
+       Types           ONLY posWord words << flatten
 
 -- GLOBAL FUNCTIONS {{{1
 
 /*
  * Main-Function
  */
-DEF layout(passages, metr) == flat( flat( setOrientation(passages, top'Settings, metr) ) ) -- BibOpalica
+DEF layout(passages, metr) == flatten(flat(setOrientation(passages, top'Settings, metr)))
 
 -- LOCAL FUNCTIONS {{{1
 
 -- Liste von Paragraphen
-FUN setOrientation : seq[seq[string]] ** real ** metrics -> seq[seq[seq[posWord]]]
+FUN setOrientation : seq[seq[string]] ** real ** metrics -> seq[seq[words]]
 DEF setOrientation(<>, y, metr) == <>
-DEF setOrientation(unbroken :: rUnbroken, y, metr) == 
+DEF setOrientation(unbroken :: rUnbroken, y, metr) ==
         LET
         brokenLines == breakSeq(unbroken, metr)
         posWords == posPas(brokenLines, y, metr) -- add alignment  
@@ -49,14 +49,14 @@ DEF setOrientation(unbroken :: rUnbroken, y, metr) ==
  */
 
 -- Zeilen in Paragraph
-FUN zip2data : seq[seq[string]] ** seq[seq[point]] ** seq[seq[real]] -> seq[seq[posWord]]
+FUN zip2data : seq[seq[string]] ** seq[seq[point]] ** seq[seq[real]] -> seq[words]
 DEF zip2data(<>, <>, <>) == <>
 DEF zip2data(t :: rt, p :: rp, w :: rw) == zip2data2(t, p, w) :: zip2data(rt, rp, rw)
 
 -- Wörter pro Zeile
-FUN zip2data2 : seq[string] ** seq[point] ** seq[real] -> seq[posWord]
-DEF zip2data2(<>, <>, <>) == <>
-DEF zip2data2(t :: rt, p :: rp, w :: rw) == posWord(t, p, w) :: zip2data2(rt, rp, rw)
+FUN zip2data2 : seq[string] ** seq[point] ** seq[real] -> words
+DEF zip2data2(<>, _, _)         == words(<>)
+DEF zip2data2(t::T, p::P, w::W) == zip2data2(T, P, W) << posWord(t, p, w)
 
 /*
  * Sort wordlines

@@ -1,13 +1,30 @@
 IMPLEMENTATION Types
 
-IMPORT Seq ONLY ::
+IMPORT Seq ONLY :: ++
        Dot ONLY .
+       SeqReduce ONLY /
 
 DATA posWord == posWord(text     : string,
                         position : point,
                         width    : real)
 
-DATA words == words(data: seq[posWord])
+DATA words == <>
+              words(data: seq[posWord])
 
+/*
+ * Put posWord into words.
+ */
 DEF (words(<>)) << (e) == words(e :: <>)
 DEF (w)         << (e) == words(e :: w.data)
+
+/*
+ * Concatenate words.
+ */
+DEF (_)           ++ (words(<>)  ) == words(<>)
+DEF (words(<>))   ++ (_)           == words(<>)
+DEF (words(seq1)) ++ (words(seq2)) == words(seq1 ++ seq2)
+
+/*
+ * Convert lists of words to one huge words.
+ */
+DEF flatten (list) == /(++, <>, list)
