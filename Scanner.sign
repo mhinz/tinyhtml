@@ -1,0 +1,8 @@
+SIGNATURE Scanner
+
+IMPORT String ONLY string
+       Seq    ONLY seq
+
+       Token  COMPLETELY
+
+FUN scan : string -> seq[token]

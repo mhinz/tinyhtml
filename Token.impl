@@ -1,0 +1,7 @@
+IMPLEMENTATION Token
+
+DATA token == tagHtmlOpen
+              tagHtmlClose
+              tagBodyOpen
+              tagBodyClose
+              error

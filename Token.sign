@@ -1,0 +1,7 @@
+SIGNATURE Token
+
+TYPE token == tagHtmlOpen
+              tagHtmlClose
+              tagBodyOpen
+              tagBodyClose
+              error

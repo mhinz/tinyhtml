@@ -1,0 +1,68 @@
+IMPLEMENTATION Scanner
+
+IMPORT Bool         ONLY not or
+       Char         ONLY char whitespace? ! =
+       String       ONLY <> :: ! % <
+       StringFilter ONLY split
+       Compose      ONLY o
+       Map          ONLY map {} def def? !
+       Seq          ONLY :: <>
+       SeqMap       ONLY map
+
+/*
+ * Scanning = Partitioning + Translating.
+ */
+DEF scan (s) == (translate o partition)(s)
+
+/*
+ * Partition string into its lexemes.
+ */
+FUN partition : string -> seq[string]
+DEF partition (<>)           == <>
+DEF partition (char :: rest) ==
+    IF whitespace?(char) THEN partition(rest) -- skip whitespace
+    IF tag?(char)        THEN %(char) :: partition(rest)
+    ELSE
+        LET (token, tail) == split(noSeparator?, char :: rest)
+    IN
+        token :: partition(tail)
+    FI
+
+/*
+ * Discriminator for chevrons.
+ */
+FUN tag? : char -> bool
+DEF tag? (char) == (char = !("<")) or (char = !(">"))
+
+/*
+ * Discriminator for separating lexemes.
+ */
+FUN noSeparator? : char -> bool
+DEF noSeparator? (char) == not(whitespace?(char) or tag?(char))
+
+/*
+ * Map lexemes to their tokens.
+ */
+FUN translate : seq[string] -> seq[token]
+DEF translate (strings) == map(lookup, strings)
+
+/*
+ * Check if the string is a valid token.
+ */
+FUN lookup : string -> token
+DEF lookup (s) ==
+    IF def?(s, table) THEN table!s
+                      ELSE error FI
+
+/*
+ * Token lookup table.
+ */
+FUN table : map[string, <, token]
+DEF table ==
+    ("html"!,  tagHtmlOpen)  def
+    ("/html"!, tagHtmlClose) def
+
+    ("body"!,  tagBodyOpen)  def
+    ("/body"!, tagBodyClose) def
+
+    {}
