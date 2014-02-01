@@ -1,5 +1,7 @@
 SIGNATURE Token
 
+IMPORT String ONLY string
+
 TYPE token == openHtml
               closeHtml
 
@@ -18,3 +20,5 @@ TYPE token == openHtml
               word(data : string)
 
               error
+
+FUN `    : token -> denotation

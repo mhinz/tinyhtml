@@ -1,5 +1,8 @@
 IMPLEMENTATION Token
 
+IMPORT Denotation ONLY ++
+       StringConv ONLY `
+
 DATA token == openHtml
               closeHtml
 
@@ -18,3 +21,26 @@ DATA token == openHtml
               word(data : string)
 
               error
+
+/*
+ * Token pretty printer.
+ */
+DEF `(openHtml)       == "openHtml"
+DEF `(closeHtml)      == "closeHtml"
+
+DEF `(openTitle)      == "openTitle"
+DEF `(closeTitle)     == "closeTitle"
+
+DEF `(openBody)       == "openBody"
+DEF `(closeBody)      == "closeBody"
+
+DEF `(openParLeft)    == "openParLeft"
+DEF `(openParRight)   == "openParRight"
+DEF `(openParCenter)  == "openParCenter"
+DEF `(openParJustify) == "openParJustify"
+DEF `(closePar)       == "closePar"
+
+DEF `(word(s))        == `(s)
+
+DEF `(error)          == "An error is a very mysterious and powerful device..." ++
+                         "and its mystery is exceeded only by its power."

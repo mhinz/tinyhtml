@@ -1,13 +1,15 @@
 IMPLEMENTATION Scanner
 
 IMPORT Bool         ONLY not or
-       Char         ONLY char whitespace? ! =
-       String       ONLY <> :: ! % <
+       Char         ONLY char whitespace? ! = |=
+       Denotation   ONLY ++ empty
+       String       ONLY <> :: ! % < ++ +% empty?
        StringFilter ONLY split
        Compose      ONLY o
        Map          ONLY map {} def def? !
        Seq          ONLY :: <>
        SeqMap       ONLY map
+       SeqReduce    COMPLETELY
 
 /*
  * Scanning = Partitioning + Translating.
@@ -18,27 +20,56 @@ DEF scan (s) == (translate o partition)(s)
  * Partition string into its lexemes.
  */
 FUN partition : string -> seq[string]
-DEF partition (<>)           == <>
-DEF partition (char :: rest) ==
-    IF whitespace?(char) THEN partition(rest) -- skip whitespace
-    IF tag?(char)        THEN %(char) :: partition(rest)
-    ELSE
-        LET (token, tail) == split(noSeparator?, char :: rest)
+DEF partition (<>)  == <>
+DEF partition (str) ==
+    LET
+        (token, rest) == fsm(str)
     IN
-        token :: partition(tail)
-    FI
+        IF empty?(token) THEN <>
+                         ELSE token :: partition(rest) FI
 
 /*
- * Discriminator for chevrons.
+ * Our finite state machine.
  */
-FUN tag? : char -> bool
-DEF tag? (char) == (char = !("<")) or (char = !(">"))
+FUN fsm : string -> string ** string
+DEF fsm (<>)           == (<>, <>)
+DEF fsm (char :: rest) ==
+    IF whitespace?(char) THEN fsm(rest)
+    IF lt?(char)         THEN inTag(%(char), rest)
+                         ELSE inWord(%(char), rest) FI
 
 /*
- * Discriminator for separating lexemes.
+ * FSM: In a tag.
  */
-FUN noSeparator? : char -> bool
-DEF noSeparator? (char) == not(whitespace?(char) or tag?(char))
+FUN inTag: string ** string -> string ** string
+DEF inTag(token, <>)           == (<>, <>)   -- [error]   end of string
+DEF inTag(token, char :: rest) ==
+    IF gt?(char) THEN (token +% char, rest)  -- [success] valid tag
+    IF lt?(char) THEN (<>, <>)               -- [error]   nested tag
+                 ELSE inTag(token +% char, rest) FI
+
+/*
+ * FSM: In a word.
+ */
+FUN inWord : string ** string -> string ** string
+DEF inWord (token, <>)           == (<>, <>)        -- [error]   end of string
+DEF inWord (token, char :: rest) ==
+    IF gt?(char)        THEN (<>, <>)               -- [error]   ">" not allowed in a word
+    IF endOfWord?(char) THEN (token, char :: rest)  -- [success] valid word
+                        ELSE inWord(token +% char, rest) FI
+
+/*
+ * Discriminators for chevrons.
+ */
+FUN lt? gt? : char -> bool
+DEF lt? (c) == c = !("<")
+DEF gt? (c) == c = !(">")
+
+/*
+ * Discriminator for end of word.
+ */
+FUN endOfWord? : char -> bool
+DEF endOfWord? (char) == whitespace?(char) or lt?(char)
 
 /*
  * Map lexemes to their tokens.
@@ -47,7 +78,7 @@ FUN translate : seq[string] -> seq[token]
 DEF translate (strings) == map(lookup, strings)
 
 /*
- * Check if the string is a valid token.
+ * A string is either a tag or a word.
  */
 FUN lookup : string -> token
 DEF lookup (s) ==
@@ -59,19 +90,34 @@ DEF lookup (s) ==
  */
 FUN table : map[string, <, token]
 DEF table ==
-    ("<html>",                           openHtml      ) def
-    ("</html>",                          closeHtml     ) def
+    ("<html>"!,                           openHtml      ) def
+    ("</html>"!,                          closeHtml     ) def
 
-    ("<title>",                          openTitle     ) def
-    ("</title>",                         closeTitle    ) def
+    ("<title>"!,                          openTitle     ) def
+    ("</title>"!,                         closeTitle    ) def
 
-    ("<body>",                           openBody      ) def
-    ("</body>",                          closeBody     ) def
+    ("<body>"!,                           openBody      ) def
+    ("</body>"!,                          closeBody     ) def
 
-    ("<p style=\"text-align:left\">",    openParLeft   ) def
-    ("<p style=\"text-align:right\">",   openParRight  ) def
-    ("<p style=\"text-align:center\">",  openParCenter ) def
-    ("<p style=\"text-align:justify\">", openParJustify) def
-    ("</p>",                             closePar      ) def
+    ("<p style=\"text-align:left\">"!,    openParLeft   ) def
+    ("<p style=\"text-align:right\">"!,   openParRight  ) def
+    ("<p style=\"text-align:center\">"!,  openParCenter ) def
+    ("<p style=\"text-align:justify\">"!, openParJustify) def
+    ("</p>"!,                             closePar      ) def
 
     {}
+
+/*
+ * Testing.
+ */
+FUN testInput : denotation
+DEF testInput == "<html>"                                         ++
+                 "<title>TinyHTML Viewer</title>"                 ++
+                 "<body>"                                         ++
+                 "<p style=\"text-align:left\">Hello World!</p>"  ++
+                 "<p style=\"text-align:right\">This rocks!!</p>" ++
+                 "</body>"                                        ++
+                 "</html>"
+
+FUN runTests : denotation
+DEF runTests == (reduce((\\a,b . "TOKEN: " ++ a ++ "\n" ++ b), empty) o map(`))(scan(!(testInput)))
