@@ -11,13 +11,6 @@ IMPORT WinFontMetrics  COMPLETELY
        StringConv      COMPLETELY
 
        Seq             COMPLETELY
-       SeqMap          COMPLETELY
-       SeqMapEnv       COMPLETELY
-       SeqOfSeq        COMPLETELY
-       SeqReduce       COMPLETELY
-       SeqZip          COMPLETELY
-
-       Pair            COMPLETELY
 
        Settings        COMPLETELY
        Dot             COMPLETELY
