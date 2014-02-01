@@ -40,7 +40,7 @@ DEF setOrientation(unbroken :: rUnbroken, y, metr) ==
         brokenLines == breakSeq(unbroken, metr)
         posWords == posPas(brokenLines, y, metr) -- add alignment
         widWords == widthWords(brokenLines, metr)
-        yNew     == asReal(#(brokenLines)) * 2 /* (height(metr) + lineskip(metr)) */ -- ... height in BibOpalica
+        yNew     == asReal(#(brokenLines)) * (height(metr) + lineskip(metr)) -- height in BibOpalica
                 IN zip2data(brokenLines, posWords, widWords) -- Seq von Wörtern, Positionen und Breiten kombinieren?
                 :: setOrientation(rUnbroken, y + yNew, metr)
 
@@ -61,7 +61,6 @@ DEF zip2data2(t::T, p::P, w::W) == zip2data2(T, P, W) << posWord(t, p, w)
 /*
  * Sort wordlines
  */
-
 FUN breakSeq: seq[string] ** metrics -> seq[seq[string]]
 DEF breakSeq(<>, metr) == <>
 DEF breakSeq(word :: rWords, metr) == 
@@ -72,8 +71,10 @@ DEF breakSeq(word :: rWords, metr) ==
                 IN
                         line :: breakSeq(trailer, metr)
 
-
-FUN fit: real ** metrics -> seq[string] -> nat   -- calculate how many initial words fit on the line
+/*
+ * Calculate how many initial words fit on the line.
+ */
+FUN fit: real ** metrics -> seq[string] -> nat
 DEF fit(supply, metr)(<>) == 0
 DEF fit(supply, metr)(word :: rest) ==
         LET 
@@ -85,11 +86,10 @@ DEF fit(supply, metr)(word :: rest) ==
 /*
  * Positions
  */
-
 FUN posPas : seq[seq[string]] ** real ** metrics -> seq[seq[point]]
 DEF posPas(<>, _, _) == <>
 DEF posPas(line :: rLines, y, metr) == 
-        LET yNew == y + 2 /* height(metr) + lineskip(metr) */
+        LET yNew == y + height(metr) + lineskip(metr)
                 IN posLineLeft(line, left'Settings, y, metr)
                 :: posPas(rLines, yNew, metr)
 
