@@ -52,17 +52,26 @@ DEF translate (strings) == map(lookup, strings)
 FUN lookup : string -> token
 DEF lookup (s) ==
     IF def?(s, table) THEN table!s
-                      ELSE error FI
+                      ELSE word(s) FI
 
 /*
  * Token lookup table.
  */
 FUN table : map[string, <, token]
 DEF table ==
-    ("html"!,  tagHtmlOpen)  def
-    ("/html"!, tagHtmlClose) def
+    ("<html>",                           openHtml      ) def
+    ("</html>",                          closeHtml     ) def
 
-    ("body"!,  tagBodyOpen)  def
-    ("/body"!, tagBodyClose) def
+    ("<title>",                          openTitle     ) def
+    ("</title>",                         closeTitle    ) def
+
+    ("<body>",                           openBody      ) def
+    ("</body>",                          closeBody     ) def
+
+    ("<p style=\"text-align:left\">",    openParLeft   ) def
+    ("<p style=\"text-align:right\">",   openParRight  ) def
+    ("<p style=\"text-align:center\">",  openParCenter ) def
+    ("<p style=\"text-align:justify\">", openParJustify) def
+    ("</p>",                             closePar      ) def
 
     {}

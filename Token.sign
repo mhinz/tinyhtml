@@ -1,7 +1,20 @@
 SIGNATURE Token
 
-TYPE token == tagHtmlOpen
-              tagHtmlClose
-              tagBodyOpen
-              tagBodyClose
+TYPE token == openHtml
+              closeHtml
+
+              openTitle
+              closeTitle
+
+              openBody
+              closeBody
+
+              openParLeft
+              openParRight
+              openParCenter
+              openParJustify
+              closePar
+
+              word(data : string)
+
               error

@@ -1,7 +1,20 @@
 IMPLEMENTATION Token
 
-DATA token == tagHtmlOpen
-              tagHtmlClose
-              tagBodyOpen
-              tagBodyClose
+DATA token == openHtml
+              closeHtml
+
+              openTitle
+              closeTitle
+
+              openBody
+              closeBody
+
+              openParLeft
+              openParRight
+              openParCenter
+              openParJustify
+              closePar
+
+              word(data : string)
+
               error
