@@ -1,38 +1,44 @@
 IMPLEMENTATION Types
 
-IMPORT Seq ONLY :: ++
-       Dot ONLY .
+IMPORT Seq       ONLY :: ++
+       Dot       ONLY .
        SeqReduce ONLY /
-
-/*
- * Hierarchy:
- *
- * ->  posWord
- * ->  line     (seq[posWord)
- * ->  par      (seq[line])
- */
 
 DATA posWord == posWord(text     : string,
                         position : point,
                         width    : real)
 
 DATA line == <>
-             line(data: seq[posWord])
+             line(words: seq[posWord])
+
+DATA par == <>
+            par(lines: seq[line])
 
 /*
  * Put "posWord" into "line".
+ * Put "line" into "par".
  */
 DEF (line(<>)) << (e) == line(e :: <>)
-DEF (l)        << (e) == line(e :: l.data)
+DEF (l)        << (e) == line(e :: l.words)
+
+DEF (par(<>))  <* (e) == par(e :: <>)
+DEF (p)        <* (e) == par(e :: p.lines)
 
 /*
  * Concatenate lines.
+ * Concatenate paragraphs.
  */
 DEF (_)          ++ (line(<>)  ) == line(<>)
 DEF (line(<>))   ++ (_)          == line(<>)
 DEF (line(seq1)) ++ (line(seq2)) == line(seq1 ++ seq2)
 
+DEF (_)          +* (par(<>)  )  == par(<>)
+DEF (par(<>))    +* (_)          == par(<>)
+DEF (par(seq1))  +* (par(seq2))  == par(seq1 ++ seq2)
+
 /*
  * Convert seq[line] to one huge line.
+ * Convert seq[par] to one huge par.
  */
-DEF flatten (list) == /(++, <>, list)
+DEF flatLine (list) == /(++, <>, list)
+DEF flatPar  (list) == /(+*, <>, list)
