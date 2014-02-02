@@ -1,15 +1,15 @@
 IMPLEMENTATION Scanner
 
-IMPORT Bool         ONLY not or
-       Char         ONLY char whitespace? ! = |=
+IMPORT Bool         ONLY or
+       Char         ONLY char whitespace? ! =
        Denotation   ONLY ++ empty
-       String       ONLY <> :: ! % < ++ +% empty?
+       String       ONLY <> :: ! % < +% empty?
        StringFilter ONLY split
        Compose      ONLY o
        Map          ONLY map {} def def? !
        Seq          ONLY :: <>
        SeqMap       ONLY map
-       SeqReduce    COMPLETELY
+       SeqReduce    ONLY reduce
 
 /*
  * Scanning = Partitioning + Translating.

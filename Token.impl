@@ -40,7 +40,7 @@ DEF `(openParCenter)  == "openParCenter"
 DEF `(openParJustify) == "openParJustify"
 DEF `(closePar)       == "closePar"
 
-DEF `(word(s))        == `(s)
+DEF `(word(s))        == "word <" ++ `(s) ++ ">"
 
 DEF `(error)          == "An error is a very mysterious and powerful device..." ++
                          "and its mystery is exceeded only by its power."
