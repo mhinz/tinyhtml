@@ -1,13 +1,12 @@
 IMPLEMENTATION Viewer
 
-IMPORT BasicIO         COMPLETELY
-       Com             COMPLETELY
-       ComCompose      COMPLETELY
-       Void            COMPLETELY
+IMPORT Void            COMPLETELY
        Nat             COMPLETELY
        NatConv         COMPLETELY
        Real            COMPLETELY
        Denotation      COMPLETELY
+       String          ONLY ++ <>
+       SeqReduce       ONLY /
 
        WinButton       COMPLETELY
        WinCanvas       COMPLETELY
@@ -17,6 +16,12 @@ IMPORT BasicIO         COMPLETELY
        WinView         COMPLETELY
        WinWindow       COMPLETELY
        WinFontMetrics  COMPLETELY
+
+       Com             ONLY succeed exit
+       ComCompose      ONLY &
+       ProcessArgs     ONLY arg argCount
+       BasicIO         ONLY writeLine
+       File            ONLY file open close readLines error?
 
        Settings        COMPLETELY
        Dot             COMPLETELY
@@ -32,11 +37,45 @@ DATA action == exit
  * Entry point.
  */
 DEF viewer ==
-    initializeGui                    & (\\gui.
-    setupWindow(gui)                 & (\\win.
-    fontMetrics(font'Settings)       & (\\metr.
-    showText(gui, sample'Draw, metr) & -- sample contains seq[seq[string]]
-    handleEmits(gui, win))))
+    argCount & (\\nargs.
+    IF nargs |= 2 THEN arg(0) & usage
+                  ELSE init FI)
+
+/*
+ * Is shown when the wrong number of arguments
+ * were given on the commandline.
+ */
+FUN usage : denotation -> com[void]
+DEF usage (arg0) == writeLine("usage: " ++ arg0 ++ " <html file>") & exit(1)
+
+/*
+ * Read TinyHTML string from given file.
+ */
+FUN readFile : denotation -> com[string]
+DEF readFile (path) ==
+    open(path, "r")                                  & (\\fd.
+    error?(fd)                                       & (\\error.
+    IF error THEN writeLine("Cannot read: " ++ path) &
+                  exit(1)
+             ELSE
+                  readLines(fd)                      & (\\lines.
+                  close(fd)                          &
+                  succeed(/(++, <>, lines))) FI))
+
+/*
+ * Initialize everything.
+ */
+FUN init : com[void]
+DEF init ==
+    writeLine("Initializing..")               & (\\ _ .
+    arg(1)                                    & (\\arg1.
+    writeLine("Read file " ++ arg1 ++ "..")   & (\\ _ .
+    readFile(arg1)                            & (\\htmlstring.
+    initializeGui                             & (\\gui.
+    setupWindow(gui)                          & (\\win.
+    fontMetrics(font'Settings)                & (\\metr.
+    showText(gui, sample'Draw, metr)          & -- sample contains seq[seq[string]]
+    handleEmits(gui, win))))))))
 
 /*
  * GUI.
