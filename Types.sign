@@ -12,8 +12,8 @@ TYPE posWord == posWord(text     : string,
 TYPE line == <>
              line(words: seq[posWord])
 
-TYPE par == <>
-            par(lines: seq[line])
+TYPE para == <>
+             para(lines: seq[line])
 
 FUN << : line ** posWord -> line
 FUN ++ : line ** line    -> line

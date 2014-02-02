@@ -14,19 +14,19 @@ IMPORT WinFontMetrics  COMPLETELY
 
        Settings        COMPLETELY
        Dot             COMPLETELY
-       Types           ONLY line flatLine par flatPar lines << <*
+       Types           ONLY line flatLine para flatPara lines << <*
 
 -- GLOBAL FUNCTIONS {{{1
 
 /*
  * Stuff all paragraphs into one line with _all_ posWords.
  */
-DEF layout(passages, metr) == flatLine(lines(flatPar(setOrientation(passages, top'Settings, metr))))
+DEF layout(passages, metr) == flatLine(lines(flatPara(setOrientation(passages, top'Settings, metr))))
 
 -- LOCAL FUNCTIONS {{{1
 
 -- Liste von Paragraphen
-FUN setOrientation : seq[seq[string]] ** real ** metrics -> seq[par]
+FUN setOrientation : seq[seq[string]] ** real ** metrics -> seq[para]
 DEF setOrientation(<>, y, metr) == <>
 DEF setOrientation(unbroken :: rUnbroken, y, metr) ==
         LET
@@ -42,8 +42,8 @@ DEF setOrientation(unbroken :: rUnbroken, y, metr) ==
  */
 
 -- Zeilen in Paragraph
-FUN zip2data : seq[seq[string]] ** seq[seq[point]] ** seq[seq[real]] -> par
-DEF zip2data(<>, _, _)                  == par(<>)
+FUN zip2data : seq[seq[string]] ** seq[seq[point]] ** seq[seq[real]] -> para
+DEF zip2data(<>, _, _)                  == para(<>)
 DEF zip2data(t :: rt, p :: rp, w :: rw) == zip2data(rt, rp, rw) <* zip2data2(t, p, w)
 
 -- Wörter pro Zeile

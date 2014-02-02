@@ -11,8 +11,8 @@ DATA posWord == posWord(text     : string,
 DATA line == <>
              line(words: seq[posWord])
 
-DATA par == <>
-            par(lines: seq[line])
+DATA para == <>
+             para(lines: seq[line])
 
 /*
  * Put "posWord" into "line".
@@ -21,8 +21,8 @@ DATA par == <>
 DEF (line(<>)) << (e) == line(e :: <>)
 DEF (l)        << (e) == line(e :: l.words)
 
-DEF (par(<>))  <* (e) == par(e :: <>)
-DEF (p)        <* (e) == par(e :: p.lines)
+DEF (para(<>)) <* (e) == para(e :: <>)
+DEF (p)        <* (e) == para(e :: p.lines)
 
 /*
  * Concatenate lines.
@@ -32,13 +32,13 @@ DEF (_)          ++ (line(<>)  ) == line(<>)
 DEF (line(<>))   ++ (_)          == line(<>)
 DEF (line(seq1)) ++ (line(seq2)) == line(seq1 ++ seq2)
 
-DEF (_)          +* (par(<>)  )  == par(<>)
-DEF (par(<>))    +* (_)          == par(<>)
-DEF (par(seq1))  +* (par(seq2))  == par(seq1 ++ seq2)
+DEF (_)          +* (para(<>)  ) == para(<>)
+DEF (para(<>))   +* (_)          == para(<>)
+DEF (para(seq1)) +* (para(seq2)) == para(seq1 ++ seq2)
 
 /*
  * Convert seq[line] to one huge line.
- * Convert seq[par] to one huge par.
+ * Convert seq[para] to one huge para.
  */
 DEF flatLine (list) == /(++, <>, list)
-DEF flatPar  (list) == /(+*, <>, list)
+DEF flatPara (list) == /(+*, <>, list)
