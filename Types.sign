@@ -18,8 +18,8 @@ TYPE para == <>
 FUN << : line ** posWord -> line
 FUN ++ : line ** line    -> line
 
-FUN <* : par ** line -> par
-FUN +* : par ** par  -> par
+FUN <* : para ** line -> para
+FUN +* : para ** para -> para
 
 FUN flatLine : seq[line] -> line
-FUN flatPar  : seq[par]  -> par
+FUN flatPara : seq[para] -> para
