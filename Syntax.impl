@@ -1,0 +1,20 @@
+IMPLEMENTATION Syntax
+
+DATA html      == fail
+                  html(title : title,
+                       body  : body)
+
+DATA title     == fail
+                  title(content : seq[string])
+
+DATA body      == fail
+                  body(content : seq[par])
+
+DATA par       == fail
+                  par(content : seq[string],
+                      align   : alignment)
+
+DATA alignment == left
+                  right
+                  center
+                  justify

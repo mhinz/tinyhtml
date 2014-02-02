@@ -1,0 +1,124 @@
+IMPLEMENTATION Parser
+
+IMPORT Bool    ONLY or
+       Seq     ONLY :: <> % empty?
+
+       Scanner ONLY scanTests scanOutput
+       Token   COMPLETELY
+
+FUN error? : seq[token] -> bool
+DEF error? (error :: _) == true
+DEF error? (_)          == false
+
+/*
+ * Parse tokens into abstract syntax tree.
+ */
+DEF parse (tokens) ==
+    LET
+        r1          == parseOpenTag(tokens)
+        (title, r2) == parseTitle(r1)
+        (body,  r3) == parseBody(r2)
+        r4          == parseCloseTag(r3)
+    IN
+        IF empty?(r4) THEN (html(title, body), r4)
+                      ELSE (fail, r4) FI
+
+/*
+ * Parse opening tags.
+ */
+FUN parseOpenTag : seq[token] -> seq[token]
+DEF parseOpenTag (t :: rest) ==
+    IF openHtml? (t) or
+       openTitle?(t) or
+       openBody? (t) THEN rest
+                     ELSE error :: (t :: rest) FI
+/*
+ * Parse closing tags.
+ */
+FUN parseCloseTag : seq[token] -> seq[token]
+DEF parseCloseTag (t :: rest) ==
+    IF closeHtml? (t) or
+       closeTitle?(t) or
+       closeBody? (t) or
+       closePar?  (t) THEN rest
+                      ELSE error :: (t :: rest) FI
+
+FUN parseTitle : seq[token] -> title ** seq[token]
+DEF parseTitle (tokens) ==
+    LET
+        r1          == parseOpenTag(tokens)
+        (words, r2) == parseWords(r1)
+        r3          == parseCloseTag(r2)
+    IN
+        IF error?(r3) THEN (fail, r3)
+                      ELSE (title(words), r3) FI
+
+FUN parseWords : seq[token] -> seq[string] ** seq[token]
+DEF parseWords (token :: rest) ==
+    IF word?(token) THEN
+                        LET
+                            (words, r1) == parseWords(rest)
+                        IN
+                            (data(token) :: words, r1)
+                    ELSE
+                        (<>, token :: rest) FI -- XXX
+
+FUN parseBody : seq[token] -> body ** seq[token]
+DEF parseBody (tokens) ==
+    LET
+        r1         == parseOpenTag(tokens)
+        (pars, r2) == parsePars(r1)
+        r3         == parseCloseTag(r2)
+    IN
+        IF error?(r3) THEN (fail, r3)
+                      ELSE (body(pars), r3) FI
+
+FUN parsePars : seq[token] -> seq[par] ** seq[token]
+DEF parsePars (token :: rest) ==
+    IF openPar?(token) THEN
+                           LET
+                               (par, r1)  == parsePar(token :: rest)
+                               (pars, r2) == parsePars(r1)
+                           IN
+                               (par :: pars, r2)
+                       ELSE
+                           (<>, token :: rest) FI
+
+FUN openPar? : token -> bool
+DEF openPar? (token) ==
+    openParLeft?   (token) or
+    openParRight?  (token) or
+    openParCenter? (token) or
+    openParJustify?(token)
+
+FUN parsePar : seq[token] -> par ** seq[token]
+DEF parsePar (<>)                  == (fail, %(error))
+DEF parsePar (openParLeft :: rest) ==
+    LET
+        (words, r1) == parseWords(rest)
+        r2          == parseCloseTag(r1)
+    IN
+        IF error?(r2) THEN (fail, r2)
+                      ELSE (par(words, left), r2) FI
+DEF parsePar (openParRight :: rest) ==
+    LET
+        (words, r1) == parseWords(rest)
+        r2          == parseCloseTag(r1)
+    IN
+        IF error?(r2) THEN (fail, r2)
+                      ELSE (par(words, right), r2) FI
+DEF parsePar (openParCenter :: rest) ==
+    LET
+        (words, r1) == parseWords(rest)
+        r2          == parseCloseTag(r1)
+    IN
+        IF error?(r2) THEN (fail, r2)
+                      ELSE (par(words, center), r2) FI
+DEF parsePar (openParJustify :: rest) ==
+    LET
+        (words, r1) == parseWords(rest)
+        r2          == parseCloseTag(r1)
+    IN
+        IF error?(r2) THEN (fail, r2)
+                      ELSE (par(words, justify), r2) FI
+DEF parsePar (tokens) == (fail, error :: tokens)

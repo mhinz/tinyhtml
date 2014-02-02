@@ -110,8 +110,8 @@ DEF table ==
 /*
  * Testing.
  */
-FUN testInput : denotation
-DEF testInput == "<html>"                                         ++
+FUN scanInput : denotation
+DEF scanInput == "<html>"                                         ++
                  "<title>TinyHTML Viewer</title>"                 ++
                  "<body>"                                         ++
                  "<p style=\"text-align:left\">Hello World!</p>"  ++
@@ -119,5 +119,6 @@ DEF testInput == "<html>"                                         ++
                  "</body>"                                        ++
                  "</html>"
 
-FUN runTests : denotation
-DEF runTests == (reduce((\\a,b . "TOKEN: " ++ a ++ "\n" ++ b), empty) o map(`))(scan(!(testInput)))
+DEF scanOutput == scan(!(scanInput))
+
+DEF scanTests == (reduce((\\a,b . "TOKEN: " ++ a ++ "\n" ++ b), empty) o map(`))(scanOutput)

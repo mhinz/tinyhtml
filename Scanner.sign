@@ -5,4 +5,7 @@ IMPORT String ONLY string
 
        Token  COMPLETELY
 
-FUN scan : string -> seq[token]
+FUN scan       : string -> seq[token]
+
+FUN scanOutput : seq[token]
+FUN scanTests  : denotation

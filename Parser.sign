@@ -1,0 +1,9 @@
+SIGNATURE Parser
+
+IMPORT String ONLY string
+       Seq    ONLY seq
+
+       Syntax COMPLETELY
+       Token  ONLY token
+
+FUN parse : seq[token] -> html ** seq[token]

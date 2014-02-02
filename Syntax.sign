@@ -1,0 +1,23 @@
+SIGNATURE Syntax
+
+IMPORT String ONLY string
+       Seq    ONLY seq
+
+TYPE html      == fail
+                  html(title : title,
+                       body  : body)
+
+TYPE title     == fail
+                  title(content : seq[string])
+
+TYPE body      == fail
+                  body(content : seq[par])
+
+TYPE par       == fail
+                  par(content : seq[string],
+                      align   : alignment)
+
+TYPE alignment == left
+                  right
+                  center
+                  justify
