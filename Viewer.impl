@@ -8,6 +8,7 @@ IMPORT Void            COMPLETELY
        String          ONLY ++ <>
        SeqReduce       ONLY /
        Bool            ONLY and
+       Seq             ONLY <>?
 
        WinButton       COMPLETELY
        WinCanvas       COMPLETELY
@@ -21,14 +22,19 @@ IMPORT Void            COMPLETELY
        Com             ONLY succeed exit
        ComCheck        ONLY |
        ComCompose      ONLY &
+       Compose         ONLY o
        ProcessArgs     ONLY arg argCount
        BasicIO         ONLY writeLine
-       File            ONLY file open close readLines error?
+       File            ONLY file open close readLines
 
        Settings        COMPLETELY
        Dot             COMPLETELY
        Draw            COMPLETELY
        Layout          COMPLETELY
+       Syntax          COMPLETELY
+       Token           ONLY token
+       Scanner         ONLY scan
+       Parser          ONLY parse
 
 DATA gui == gui(edit : canvasEditor,
                 emit : emitter[action])
@@ -68,12 +74,22 @@ DEF readFile (path) ==
 FUN init : com[void]
 DEF init ==
     arg(1)                            &
-    readFile                          & (\\htmlstring.
+    readFile                          &
+    buildAST                          & (\\ast.
     initializeGui                     & (\\gui.
     setupWindow(gui)                  & (\\win.
     fontMetrics(font'Settings)        & (\\metr.
     showText(gui, sample'Draw, metr)  & -- sample contains seq[seq[string]]
     handleEmits(gui, win)))))
+
+FUN buildAST : string -> com[html]
+DEF buildAST (htmlstring) ==
+    LET
+        (ast, rest) == parse(scan(htmlstring))
+    IN
+        IF <>?(rest) THEN succeed(ast)
+                     ELSE writeLine("[!] Parsing failed.") &
+                          exit(1) FI
 
 /*
  * GUI.
