@@ -36,6 +36,7 @@ DEF parseOpenTag (t :: rest) ==
  * Parse closing tags.
  */
 FUN parseCloseTag : seq[token] -> seq[token]
+DEF parseCloseTag (<>)        == %(error)
 DEF parseCloseTag (t :: rest) ==
     IF closeHtml? (t) or
        closeTitle?(t) or
