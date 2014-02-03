@@ -7,6 +7,7 @@ IMPORT Void            COMPLETELY
        Denotation      COMPLETELY
        String          ONLY ++ <>
        SeqReduce       ONLY /
+       Bool            ONLY and
 
        WinButton       COMPLETELY
        WinCanvas       COMPLETELY
@@ -18,6 +19,7 @@ IMPORT Void            COMPLETELY
        WinFontMetrics  COMPLETELY
 
        Com             ONLY succeed exit
+       ComCheck        ONLY |
        ComCompose      ONLY &
        ProcessArgs     ONLY arg argCount
        BasicIO         ONLY writeLine
@@ -53,45 +55,43 @@ DEF usage (arg0) == writeLine("usage: " ++ arg0 ++ " <html file>") & exit(1)
  */
 FUN readFile : denotation -> com[string]
 DEF readFile (path) ==
-    open(path, "r")                                  & (\\fd.
-    error?(fd)                                       & (\\error.
-    IF error THEN writeLine("Cannot read: " ++ path) &
-                  exit(1)
-             ELSE
-                  readLines(fd)                      & (\\lines.
-                  close(fd)                          &
-                  succeed(/(++, <>, lines))) FI))
+    writeLine("[*] Read file " ++ path ++ "..")               & (\\ _ .
+    open(path, "r") | (writeLine("[!] Cannot read: " ++ path) &
+                       exit(1))                               & (\\fd.
+    readLines(fd)                                             & (\\lines.
+    close(fd)                                                 &
+    succeed(/(++, <>, lines)))))
 
 /*
  * Initialize everything.
  */
 FUN init : com[void]
 DEF init ==
-    writeLine("Initializing..")               & (\\ _ .
-    arg(1)                                    & (\\arg1.
-    writeLine("Read file " ++ arg1 ++ "..")   & (\\ _ .
-    readFile(arg1)                            & (\\htmlstring.
-    initializeGui                             & (\\gui.
-    setupWindow(gui)                          & (\\win.
-    fontMetrics(font'Settings)                & (\\metr.
-    showText(gui, sample'Draw, metr)          & -- sample contains seq[seq[string]]
-    handleEmits(gui, win))))))))
+    arg(1)                            &
+    readFile                          & (\\htmlstring.
+    initializeGui                     & (\\gui.
+    setupWindow(gui)                  & (\\win.
+    fontMetrics(font'Settings)        & (\\metr.
+    showText(gui, sample'Draw, metr)  & -- sample contains seq[seq[string]]
+    handleEmits(gui, win)))))
 
 /*
  * GUI.
  */
 FUN initializeGui : com[gui]
 DEF initializeGui ==
-    canvasEditor      & (\\edit.
-    emitter           & (\\emit.
-    succeed(gui(edit, emit))))
+    writeLine("[*] Initialize GUI..")  & (\\ _ .
+    canvasEditor                       & (\\edit.
+    emitter                            & (\\emit.
+    succeed(gui(edit, emit)))))
 
 FUN setupWindow : gui -> com[window]
 DEF setupWindow (gui) ==
-    window(frame(gui))                  & (\\win.
-    set(win, titleName(title'Settings)) & ( -- TODO: replace settings by file.title'Parser
-    grab(win)                           &
-    succeed(win)))
+    writeLine("[*] Setup window..")         & (\\ _ .
+    window(frame(gui))                      & (\\win.
+    set(win, titleName(title'Settings))     & ( -- TODO: replace settings by file.title'Parser
+    grab(win)                               &
+    succeed(win))))
 
 FUN frame : gui -> view
 DEF frame (gui) == pad(gui.edit) ^^ exitButton(gui.emit)
@@ -118,9 +118,10 @@ DEF showText(gui, passages, metr) == draw'Draw(gui.edit, passages, metr)
 
 FUN handleEmits : gui ** window -> com[void]
 DEF handleEmits (gui, win) ==
-    await(gui.emit)    & (\\act.
+    writeLine("[*] Register events..") & (\\ _ .
+    await(gui.emit)                    & (\\act.
     IF exit?(act) THEN
-        release(win)   &
-        delete(win)    &
+        release(win)                   &
+        delete(win)                    &
         exit(0)
-    FI)
+    FI))
