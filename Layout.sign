@@ -7,5 +7,6 @@ IMPORT Seq            ONLY seq
        WinFontMetrics ONLY metrics
 
        Types          ONLY posWord line
+       Syntax         COMPLETELY
 
-FUN layout : seq[seq[string]] ** metrics -> line
+FUN computeLayout : seq[par] ** metrics -> line

@@ -40,9 +40,7 @@ DEF sample == %(
 /*
  * Draw the display.
  */
-DEF draw(edit, passages, metr) == display(edit, posWords.lineToDrawing)
-    WHERE
-        posWords == layout(passages, metr)
+DEF draw(edit, hugeline, metr) == display(edit, hugeline.lineToDrawing)
 
 -- LOCAL FUNCTIONS {{{1
 

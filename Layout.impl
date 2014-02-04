@@ -11,36 +11,80 @@ IMPORT WinFontMetrics  COMPLETELY
        StringConv      COMPLETELY
 
        Seq             COMPLETELY
+       SeqMap          ONLY map
+       SeqReduce       ONLY reduce
 
        Settings        COMPLETELY
        Dot             COMPLETELY
-       Types           ONLY line flatLine para flatPara lines << <*
+       Types           COMPLETELY
 
 -- GLOBAL FUNCTIONS {{{1
 
+DEF computeLayout (<>, _)      == <>
+DEF computeLayout (pars, metr) == flatLine(lines(flatPara(layPar(pars, top'Settings, metr))))
+
 /*
- * Stuff all paragraphs into one line with _all_ posWords.
+ * Return a line (seq[posWord]) containing an aligned paragraph.
  */
-DEF layout (passages, metr) == flatLine(lines(flatPara(setOrientation(passages, top'Settings, metr))))
-
--- LOCAL FUNCTIONS {{{1
-
--- Liste von Paragraphen
-FUN setOrientation : seq[seq[string]] ** real ** metrics -> seq[para]
-DEF setOrientation (<>, _, _)                       == <>
-DEF setOrientation (unbroken :: rUnbroken, y, metr) ==
+FUN layPar : seq[par] ** real ** metrics -> seq[para]
+DEF layPar (<>, _, _)                             == <>
+DEF layPar (par(content, align) :: pars, y, metr) ==
     LET
-        brokenLines == breakSeq(unbroken, metr)
-        posWords    == posPas(brokenLines, y, metr) -- add alignment
-        widWords    == widthWords(brokenLines, metr)
-        yNew        == asReal(#(brokenLines)) * (height(metr) + lineskip(metr)) -- height in BibOpalica
+        lines      == breakLines(content, metr)
+        wordsPos   == computePosition(lines, align, y, metr)
+        wordsWidth == widthWords(lines, metr)
+        yNew       == asReal(#(lines)) * (height(metr) + lineskip(metr))
     IN
-        zip2data(brokenLines, posWords, widWords) -- Seq von Wörtern, Positionen und Breiten kombinieren?
-        :: setOrientation(rUnbroken, y + yNew, metr)
+        zip2data(lines, wordsPos, wordsWidth) :: layPar(pars, y + yNew, metr)
+
 
 /*
- * Zipping 2 Datatype
+ * Wordwidths
  */
+FUN widthWords : seq[seq[string]] ** metrics -> seq[seq[real]]
+DEF widthWords (<>, _)               == <>
+DEF widthWords (line :: lines, metr) == widthWordsInLine(line, metr) :: widthWords(lines, metr)
+
+FUN width : string ** metrics -> real
+DEF width (word, metr) == width
+    WHERE
+        (width, height) == dimensions(metr)(`(word))
+
+FUN widthWordsInLine : seq[string] ** metrics -> seq[real]
+DEF widthWordsInLine (<>, _)                == <>
+DEF widthWordsInLine (word :: rWords, metr) == width(word, metr) :: widthWordsInLine(rWords, metr)
+
+
+
+
+FUN computePosition : seq[seq[string]] ** alignment ** real ** metrics -> seq[seq[point]]
+DEF computePosition (<>, _, _, _)                   == <>
+DEF computePosition (line :: lines, align, y, metr) ==
+    LET
+        yNew   == y + height(metr) + lineskip(metr)
+        points == IF left?(align) THEN getPointsLeft(line, left'Settings, y, metr)
+                                  ELSE getPointsLeft(line, left'Settings, y, metr) FI
+    IN
+        points :: computePosition(lines, align, yNew, metr)
+
+
+FUN getPointsLeft : seq[string] ** real ** real ** metrics -> seq[point]
+DEF getPointsLeft (<>, _, _, _)               == <>
+DEF getPointsLeft (word :: words, x, y, metr) ==
+    (x @ y) :: getPointsLeft(words, xNew, y, metr)
+        WHERE
+            xNew == x + width(word, metr)
+
+
+FUN breakLines : seq[string] ** metrics -> seq[seq[string]]
+DEF breakLines (<>, _)               == <>
+DEF breakLines (word :: words, metr) ==
+    LET
+        w            == width(word, metr)
+        k            == 1 + fit(pageWidth - w, metr)(words)
+        (line, tail) == split(k, words)
+    IN
+        line :: breakLines(tail, metr)
 
 -- Zeilen in Paragraph
 FUN zip2data : seq[seq[string]] ** seq[seq[point]] ** seq[seq[real]] -> para
@@ -52,22 +96,6 @@ FUN zip2data2 : seq[string] ** seq[point] ** seq[real] -> line
 DEF zip2data2 (<>, _, _)         == line(<>)
 DEF zip2data2 (t::T, p::P, w::W) == zip2data2(T, P, W) << posWord(t, p, w)
 
-/*
- * Sort wordlines
- */
-FUN breakSeq : seq[string] ** metrics -> seq[seq[string]]
-DEF breakSeq (<>, _)                == <>
-DEF breakSeq (word :: rWords, metr) == 
-    LET
-        wd              == width(word, metr)
-        k               == 1 + fit(pageWidth - wd, metr)(rWords) -- +1 cause of the front word
-        (line, trailer) == split(k, rWords)
-    IN
-        line :: breakSeq(trailer, metr)
-
-/*
- * Calculate how many initial words fit on the line.
- */
 FUN fit : real ** metrics -> seq[string] -> nat
 DEF fit (_, _)(<>)                   == 0
 DEF fit (supply, metr)(word :: rest) ==
@@ -76,55 +104,6 @@ DEF fit (supply, metr)(word :: rest) ==
     IN
         IF needed <= supply THEN 1 + fit(supply - needed, metr)(rest)
                             ELSE 0 FI
-
-/*
- * Positions
- */
-FUN posPas : seq[seq[string]] ** real ** metrics -> seq[seq[point]]
-DEF posPas (<>, _, _)                == <>
-DEF posPas (line :: rLines, y, metr) == 
-    LET
-        yNew == y + height(metr) + lineskip(metr)
-    IN
-        posLineLeft(line, left'Settings, y, metr)
-        :: posPas(rLines, yNew, metr)
-
--- DEF height : metrics -> real ...BibOpalica
-
-FUN posLineLeft : seq[string] ** real ** real ** metrics -> seq[point]
-DEF posLineLeft (<>, _, _, _)                == <>
-DEF posLineLeft (word :: rWords, x, y, metr) == (x @ y) :: posLineLeft(rWords, xNew, y, metr)
-    WHERE
-        xNew == x + width(word, metr)
-
-/*
-FUN posLineRight : seq[string] -> seq[point] ... ** ** **
-DEF posLineRight(<>, metr) == <>
-DEF posLineRight(word :: rWords, x, y, metr) == LET 
-                                                wd   == width(word, metr)
-                                                xNew == x - wd
-                                                IN ( (x - wd) @ y) :: posLineRight(rWords, xNew, y, metr)
-*/
-
-/*
- * Wordwidths
- */
-FUN widthWords : seq[seq[string]] ** metrics -> seq[seq[real]]
-DEF widthWords (<>, _)                == <>
-DEF widthWords (line :: rLines, metr) == widthWordsInLine(line, metr) :: widthWords(rLines, metr)
-
-
-FUN widthWordsInLine : seq[string] ** metrics -> seq[real]
-DEF widthWordsInLine (<>, _)                == <>
-DEF widthWordsInLine (word :: rWords, metr) == width(word, metr) :: widthWordsInLine(rWords, metr)
-
-/*
- * Additional
- */
-FUN width : string ** metrics -> real
-DEF width (word, metr) == wordWidth
-    WHERE
-        (wordWidth, height) == dimensions(metr)(`(word))
 
 FUN pageWidth : real
 DEF pageWidth == canvasWidth'Settings - (2 * margin'Settings)

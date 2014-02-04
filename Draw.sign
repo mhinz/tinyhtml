@@ -2,10 +2,15 @@ SIGNATURE Draw
 
 IMPORT Com             ONLY com
        Void            ONLY void
+       Real            ONLY real
        Seq             ONLY seq
        String          ONLY string
        WinCanvasEditor ONLY canvasEditor
+       WinConfig       ONLY point
        WinFontMetrics  ONLY metrics
 
-FUN draw   : canvasEditor ** seq[seq[string]] ** metrics -> com[void]
+       Syntax          COMPLETELY
+       Types           ONLY posWord line
+
+FUN draw   : canvasEditor ** line ** metrics -> com[void]
 FUN sample : seq[seq[string]]

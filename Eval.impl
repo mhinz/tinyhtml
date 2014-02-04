@@ -1,0 +1,20 @@
+IMPLEMENTATION Eval
+
+IMPORT Void            ONLY void
+       Com             ONLY succeed
+       WinCanvasEditor ONLY canvasEditor
+
+       Draw            ONLY draw
+       Syntax          COMPLETELY
+       Types           ONLY line <> para
+       Layout          ONLY computeLayout
+
+/*
+ * Extract title and paragraphs from TinyHTML AST.
+ */
+DEF eval (fail, _)                 == succeed(<>)  -- error
+DEF eval (html(title, body), metr) == succeed(evalBody(body, metr))
+
+FUN evalBody : body ** metrics -> line
+DEF evalBody (fail, _)             == <>  -- error
+DEF evalBody (body(content), metr) == computeLayout(content, metr)

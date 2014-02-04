@@ -35,6 +35,7 @@ IMPORT Void            COMPLETELY
        Token           ONLY token
        Scanner         ONLY scan
        Parser          ONLY parse
+       Eval            ONLY eval
 
 DATA gui == gui(edit : canvasEditor,
                 emit : emitter[action])
@@ -79,8 +80,9 @@ DEF init ==
     initializeGui                          & (\\gui.
     setupWindow(gui)                       & (\\win.
     fontMetrics(font'Settings)             & (\\metr.
-    draw'Draw(gui.edit, sample'Draw, metr) &
-    handleEmits(gui, win)))))
+    eval(ast, metr)                        & (\\hugeline.
+    draw'Draw(gui.edit, hugeline, metr)    &
+    handleEmits(gui, win))))))
 
 FUN buildAST : string -> com[html]
 DEF buildAST (htmlstring) ==

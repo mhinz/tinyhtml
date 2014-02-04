@@ -1,0 +1,11 @@
+SIGNATURE Eval
+
+IMPORT Com            ONLY com
+       Real           ONLY real
+       WinConfig      ONLY point
+       WinFontMetrics ONLY metrics
+
+       Syntax         COMPLETELY
+       Types          ONLY posWord line
+
+FUN eval : html ** metrics -> com[line]
