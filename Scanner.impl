@@ -111,12 +111,12 @@ DEF table ==
  * Testing.
  */
 FUN scanInput : denotation
-DEF scanInput == "<html>"                                         ++
-                 "<title>TinyHTML Viewer</title>"                 ++
-                 "<body>"                                         ++
-                 "<p style=\"text-align:left\">Hello World!</p>"  ++
-                 "<p style=\"text-align:right\">This rocks!!</p>" ++
-                 "</body>"                                        ++
+DEF scanInput == "<html>"                                               ++
+                 "<title>TinyHTML Viewer</title>"                       ++
+                 "<body>"                                               ++
+                 "<p style=\"text-align:left\">Line 1 one one one</p>"  ++
+                 "<p style=\"text-align:right\">Line 2 two two two</p>" ++
+                 "</body>"                                              ++
                  "</html>"
 
 DEF scanOutput == scan(!(scanInput))
