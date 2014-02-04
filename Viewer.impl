@@ -73,13 +73,13 @@ DEF readFile (path) ==
  */
 FUN init : com[void]
 DEF init ==
-    arg(1)                            &
-    readFile                          &
-    buildAST                          & (\\ast.
-    initializeGui                     & (\\gui.
-    setupWindow(gui)                  & (\\win.
-    fontMetrics(font'Settings)        & (\\metr.
-    showText(gui, sample'Draw, metr)  & -- sample contains seq[seq[string]]
+    arg(1)                                 &
+    readFile                               &
+    buildAST                               & (\\ast.
+    initializeGui                          & (\\gui.
+    setupWindow(gui)                       & (\\win.
+    fontMetrics(font'Settings)             & (\\metr.
+    draw'Draw(gui.edit, sample'Draw, metr) &
     handleEmits(gui, win)))))
 
 FUN buildAST : string -> com[html]
@@ -122,16 +122,6 @@ DEF pad (editor) ==
 FUN exitButton : emitter[action] -> view
 DEF exitButton (emit) == button with (bind(emit, exit) ++
                                       text("Beenden"))
-
-/*
- * Use Viewer
- */
--- seq[posWord] will be replaced bei file
--- words will be replaced by file.layout
-FUN showText : gui ** seq[seq[string]] ** metrics -> com[void]
--- DEF showText(gui, words) == draw'Draw(gui.edit, words) 
-DEF showText(gui, passages, metr) == draw'Draw(gui.edit, passages, metr) 
-
 FUN handleEmits : gui ** window -> com[void]
 DEF handleEmits (gui, win) ==
     writeLine("[*] Register events..") & (\\ _ .
