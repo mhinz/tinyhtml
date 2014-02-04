@@ -21,21 +21,22 @@ IMPORT WinFontMetrics  COMPLETELY
 /*
  * Stuff all paragraphs into one line with _all_ posWords.
  */
-DEF layout(passages, metr) == flatLine(lines(flatPara(setOrientation(passages, top'Settings, metr))))
+DEF layout (passages, metr) == flatLine(lines(flatPara(setOrientation(passages, top'Settings, metr))))
 
 -- LOCAL FUNCTIONS {{{1
 
 -- Liste von Paragraphen
 FUN setOrientation : seq[seq[string]] ** real ** metrics -> seq[para]
-DEF setOrientation(<>, y, metr) == <>
-DEF setOrientation(unbroken :: rUnbroken, y, metr) ==
-        LET
+DEF setOrientation (<>, _, _)                       == <>
+DEF setOrientation (unbroken :: rUnbroken, y, metr) ==
+    LET
         brokenLines == breakSeq(unbroken, metr)
-        posWords == posPas(brokenLines, y, metr) -- add alignment
-        widWords == widthWords(brokenLines, metr)
-        yNew     == asReal(#(brokenLines)) * (height(metr) + lineskip(metr)) -- height in BibOpalica
-                IN zip2data(brokenLines, posWords, widWords) -- Seq von Wörtern, Positionen und Breiten kombinieren?
-                :: setOrientation(rUnbroken, y + yNew, metr)
+        posWords    == posPas(brokenLines, y, metr) -- add alignment
+        widWords    == widthWords(brokenLines, metr)
+        yNew        == asReal(#(brokenLines)) * (height(metr) + lineskip(metr)) -- height in BibOpalica
+    IN
+        zip2data(brokenLines, posWords, widWords) -- Seq von Wörtern, Positionen und Breiten kombinieren?
+        :: setOrientation(rUnbroken, y + yNew, metr)
 
 /*
  * Zipping 2 Datatype
@@ -43,55 +44,59 @@ DEF setOrientation(unbroken :: rUnbroken, y, metr) ==
 
 -- Zeilen in Paragraph
 FUN zip2data : seq[seq[string]] ** seq[seq[point]] ** seq[seq[real]] -> para
-DEF zip2data(<>, _, _)                  == para(<>)
-DEF zip2data(t :: rt, p :: rp, w :: rw) == zip2data(rt, rp, rw) <* zip2data2(t, p, w)
+DEF zip2data (<>, _, _)                  == para(<>)
+DEF zip2data (t :: rt, p :: rp, w :: rw) == zip2data(rt, rp, rw) <* zip2data2(t, p, w)
 
 -- Wörter pro Zeile
 FUN zip2data2 : seq[string] ** seq[point] ** seq[real] -> line
-DEF zip2data2(<>, _, _)         == line(<>)
-DEF zip2data2(t::T, p::P, w::W) == zip2data2(T, P, W) << posWord(t, p, w)
+DEF zip2data2 (<>, _, _)         == line(<>)
+DEF zip2data2 (t::T, p::P, w::W) == zip2data2(T, P, W) << posWord(t, p, w)
 
 /*
  * Sort wordlines
  */
-FUN breakSeq: seq[string] ** metrics -> seq[seq[string]]
-DEF breakSeq(<>, metr) == <>
-DEF breakSeq(word :: rWords, metr) == 
-        LET 
+FUN breakSeq : seq[string] ** metrics -> seq[seq[string]]
+DEF breakSeq (<>, _)                == <>
+DEF breakSeq (word :: rWords, metr) == 
+    LET
         wd              == width(word, metr)
         k               == 1 + fit(pageWidth - wd, metr)(rWords) -- +1 cause of the front word
         (line, trailer) == split(k, rWords)
-                IN
-                        line :: breakSeq(trailer, metr)
+    IN
+        line :: breakSeq(trailer, metr)
 
 /*
  * Calculate how many initial words fit on the line.
  */
-FUN fit: real ** metrics -> seq[string] -> nat
-DEF fit(supply, metr)(<>) == 0
-DEF fit(supply, metr)(word :: rest) ==
-        LET 
+FUN fit : real ** metrics -> seq[string] -> nat
+DEF fit (_, _)(<>)                   == 0
+DEF fit (supply, metr)(word :: rest) ==
+    LET
         needed == glue(metr) + width(word, metr)
-                IN
-                        IF needed <= supply THEN 1 + fit(supply - needed, metr)(rest)
-                        IF needed >= supply THEN 0 FI
+    IN
+        IF needed <= supply THEN 1 + fit(supply - needed, metr)(rest)
+                            ELSE 0 FI
 
 /*
  * Positions
  */
 FUN posPas : seq[seq[string]] ** real ** metrics -> seq[seq[point]]
-DEF posPas(<>, _, _) == <>
-DEF posPas(line :: rLines, y, metr) == 
-        LET yNew == y + height(metr) + lineskip(metr)
-                IN posLineLeft(line, left'Settings, y, metr)
-                :: posPas(rLines, yNew, metr)
+DEF posPas (<>, _, _)                == <>
+DEF posPas (line :: rLines, y, metr) == 
+    LET
+        yNew == y + height(metr) + lineskip(metr)
+    IN
+        posLineLeft(line, left'Settings, y, metr)
+        :: posPas(rLines, yNew, metr)
 
 -- DEF height : metrics -> real ...BibOpalica
 
 FUN posLineLeft : seq[string] ** real ** real ** metrics -> seq[point]
-DEF posLineLeft(<>, _, _, _) == <>
-DEF posLineLeft(word :: rWords, x, y, metr) == LET xNew == x + width(word, metr)
-                                                IN (x @ y) :: posLineLeft(rWords, xNew, y, metr)
+DEF posLineLeft (<>, _, _, _)                == <>
+DEF posLineLeft (word :: rWords, x, y, metr) == (x @ y) :: posLineLeft(rWords, xNew, y, metr)
+    WHERE
+        xNew == x + width(word, metr)
+
 /*
 FUN posLineRight : seq[string] -> seq[point] ... ** ** **
 DEF posLineRight(<>, metr) == <>
@@ -105,23 +110,24 @@ DEF posLineRight(word :: rWords, x, y, metr) == LET
  * Wordwidths
  */
 FUN widthWords : seq[seq[string]] ** metrics -> seq[seq[real]]
-DEF widthWords(<>, metr) == <>
-DEF widthWords(line :: rLines, metr) == widthWordsInLine(line, metr) :: widthWords(rLines, metr)
+DEF widthWords (<>, _)                == <>
+DEF widthWords (line :: rLines, metr) == widthWordsInLine(line, metr) :: widthWords(rLines, metr)
 
 
 FUN widthWordsInLine : seq[string] ** metrics -> seq[real]
-DEF widthWordsInLine(<>, metr) == <>
-DEF widthWordsInLine(word :: rWords, metr) == width(word, metr) :: widthWordsInLine(rWords, metr)
+DEF widthWordsInLine (<>, _)                == <>
+DEF widthWordsInLine (word :: rWords, metr) == width(word, metr) :: widthWordsInLine(rWords, metr)
 
 /*
  * Additional
  */
 FUN width : string ** metrics -> real
-DEF width(word, metr) == LET (wordWidth, height) == dimensions(metr)(`(word))
-                                IN wordWidth
+DEF width (word, metr) == wordWidth
+    WHERE
+        (wordWidth, height) == dimensions(metr)(`(word))
 
 FUN pageWidth : real
 DEF pageWidth == canvasWidth'Settings - (2 * margin'Settings)
 
 FUN glue : metrics -> real
-DEF glue(metr) == width( !(" "), metr)  
+DEF glue (metr) == width(!(" "), metr)
