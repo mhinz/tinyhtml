@@ -23,9 +23,6 @@ IMPORT WinFontMetrics  COMPLETELY
 DEF computeLayout (<>, _)      == <>
 DEF computeLayout (pars, metr) == flatLine(lines(flatPara(layPar(pars, top'Settings, metr))))
 
-/*
- * Return a line (seq[posWord]) containing an aligned paragraph.
- */
 FUN layPar : seq[par] ** real ** metrics -> seq[para]
 DEF layPar (<>, _, _)                             == <>
 DEF layPar (par(content, align) :: pars, y, metr) ==
