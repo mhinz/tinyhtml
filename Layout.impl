@@ -79,7 +79,7 @@ DEF breakLines (word :: words, metr) ==
     LET
         w            == width(word, metr)
         k            == 1 + fit(pageWidth - w, metr)(words)
-        (line, tail) == split(k, words)
+        (line, tail) == split(k, word :: words)
     IN
         line :: breakLines(tail, metr)
 
