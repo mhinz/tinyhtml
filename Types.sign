@@ -6,8 +6,7 @@ IMPORT Seq       ONLY seq
        WinConfig ONLY point
 
 TYPE posWord == posWord(text     : string,
-                        position : point,
-                        width    : real)
+                        position : point)
 
 TYPE line == <>
              line(words: seq[posWord])

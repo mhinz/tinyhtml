@@ -6,9 +6,11 @@ IMPORT Void            COMPLETELY
        Real            COMPLETELY
        Denotation      COMPLETELY
        String          ONLY ++ <>
+       StringConv      ONLY `
        SeqReduce       ONLY /
        Bool            ONLY and
        Seq             ONLY <>?
+       SeqReduce       ONLY reduce
 
        WinButton       COMPLETELY
        WinCanvas       COMPLETELY
@@ -78,11 +80,12 @@ DEF init ==
     readFile                               &
     buildAST                               & (\\ast.
     initializeGui                          & (\\gui.
-    setupWindow(gui)                       & (\\win.
+    getTitle(ast)                          & (\\title.
+    setupWindow(gui, title)                & (\\win.
     fontMetrics(font'Settings)             & (\\metr.
     eval(ast, metr)                        & (\\hugeline.
     draw'Draw(gui.edit, hugeline, metr)    &
-    handleEmits(gui, win))))))
+    handleEmits(gui, win)))))))
 
 FUN buildAST : string -> com[html]
 DEF buildAST (htmlstring) ==
@@ -92,6 +95,9 @@ DEF buildAST (htmlstring) ==
         IF <>?(rest) THEN succeed(ast)
                      ELSE writeLine("[!] Parsing failed.") &
                           exit(1) FI
+
+FUN getTitle : html -> com[denotation]
+DEF getTitle (html(title, _)) == succeed(reduce(++, <>, content(title))`)
 
 /*
  * GUI.
@@ -103,12 +109,12 @@ DEF initializeGui ==
     emitter                            & (\\emit.
     succeed(gui(edit, emit)))))
 
-FUN setupWindow : gui -> com[window]
-DEF setupWindow (gui) ==
-    writeLine("[*] Setup window..")         & (\\ _ .
-    window(frame(gui))                      & (\\win.
-    set(win, titleName(title'Settings))     & ( -- TODO: replace settings by file.title'Parser
-    grab(win)                               &
+FUN setupWindow : gui ** denotation -> com[window]
+DEF setupWindow (gui, title) ==
+    writeLine("[*] Setup window..") & (\\ _ .
+    window(frame(gui))              & (\\win.
+    set(win, titleName(title))      & (
+    grab(win)                       &
     succeed(win))))
 
 FUN frame : gui -> view

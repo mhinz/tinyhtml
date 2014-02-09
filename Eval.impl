@@ -12,9 +12,9 @@ IMPORT Void            ONLY void
 /*
  * Extract title and paragraphs from TinyHTML AST.
  */
-DEF eval (fail, _)                 == succeed(<>)  -- error
+DEF eval (fail, _)                 == succeed(<>)
 DEF eval (html(title, body), metr) == succeed(evalBody(body, metr))
 
 FUN evalBody : body ** metrics -> line
-DEF evalBody (fail, _)             == <>  -- error
+DEF evalBody (fail, _)             == <>
 DEF evalBody (body(content), metr) == computeLayout(content, metr)

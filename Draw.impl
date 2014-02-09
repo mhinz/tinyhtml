@@ -49,6 +49,6 @@ DEF lineToDrawing (<>)         == {}
 DEF lineToDrawing (line(<>))   == {}
 DEF lineToDrawing (line(w::W)) == lineToDrawing(line(W)) ++ (text(w.position) with
                                                             (text      (w.text)        ++
-                                                             anchor    (north)         ++
+                                                             anchor    (west)          ++
                                                              font      (font'Settings) ++
                                                              foreground(foreground'Settings)))

@@ -27,52 +27,15 @@ FUN layPar : seq[par] ** real ** metrics -> seq[para]
 DEF layPar (<>, _, _)                             == <>
 DEF layPar (par(content, align) :: pars, y, metr) ==
     LET
-        lines      == breakLines(content, metr)
-        wordsPos   == computePosition(lines, align, y, metr)
-        wordsWidth == widthWords(lines, metr)
-        yNew       == asReal(#(lines)) * (height(metr) + lineskip(metr))
+        lines    == breakLines(content, metr)
+        wordsPos == computePosition(lines, align, y, metr)
+        yNew     == y + (asReal(#(lines)) * (height(metr) + lineskip(metr)))
     IN
-        zip2data(lines, wordsPos, wordsWidth) :: layPar(pars, y + yNew, metr)
-
+        zip2dataPar(lines, wordsPos) :: layPar(pars, yNew, metr)
 
 /*
- * Wordwidths
+ * Check how many words fit on the lines
  */
-FUN widthWords : seq[seq[string]] ** metrics -> seq[seq[real]]
-DEF widthWords (<>, _)               == <>
-DEF widthWords (line :: lines, metr) == widthWordsInLine(line, metr) :: widthWords(lines, metr)
-
-FUN width : string ** metrics -> real
-DEF width (word, metr) == width
-    WHERE
-        (width, height) == dimensions(metr)(`(word))
-
-FUN widthWordsInLine : seq[string] ** metrics -> seq[real]
-DEF widthWordsInLine (<>, _)                == <>
-DEF widthWordsInLine (word :: rWords, metr) == width(word, metr) :: widthWordsInLine(rWords, metr)
-
-
-
-
-FUN computePosition : seq[seq[string]] ** alignment ** real ** metrics -> seq[seq[point]]
-DEF computePosition (<>, _, _, _)                   == <>
-DEF computePosition (line :: lines, align, y, metr) ==
-    LET
-        yNew   == y + height(metr) + lineskip(metr)
-        points == IF left?(align) THEN getPointsLeft(line, left'Settings, y, metr)
-                                  ELSE getPointsLeft(line, left'Settings, y, metr) FI
-    IN
-        points :: computePosition(lines, align, yNew, metr)
-
-
-FUN getPointsLeft : seq[string] ** real ** real ** metrics -> seq[point]
-DEF getPointsLeft (<>, _, _, _)               == <>
-DEF getPointsLeft (word :: words, x, y, metr) ==
-    (x @ y) :: getPointsLeft(words, xNew, y, metr)
-        WHERE
-            xNew == x + width(word, metr)
-
-
 FUN breakLines : seq[string] ** metrics -> seq[seq[string]]
 DEF breakLines (<>, _)               == <>
 DEF breakLines (word :: words, metr) ==
@@ -83,27 +46,82 @@ DEF breakLines (word :: words, metr) ==
     IN
         line :: breakLines(tail, metr)
 
--- Zeilen in Paragraph
-FUN zip2data : seq[seq[string]] ** seq[seq[point]] ** seq[seq[real]] -> para
-DEF zip2data (<>, _, _)                  == para(<>)
-DEF zip2data (t :: rt, p :: rp, w :: rw) == zip2data(rt, rp, rw) <* zip2data2(t, p, w)
-
--- Wörter pro Zeile
-FUN zip2data2 : seq[string] ** seq[point] ** seq[real] -> line
-DEF zip2data2 (<>, _, _)         == line(<>)
-DEF zip2data2 (t::T, p::P, w::W) == zip2data2(T, P, W) << posWord(t, p, w)
-
 FUN fit : real ** metrics -> seq[string] -> nat
 DEF fit (_, _)(<>)                   == 0
 DEF fit (supply, metr)(word :: rest) ==
     LET
-        needed == glue(metr) + width(word, metr)
+        needed == glue(<>, metr, left) + width(word, metr)
+        -- glue with alignment 'left' gives normal spacebar
     IN
         IF needed <= supply THEN 1 + fit(supply - needed, metr)(rest)
                             ELSE 0 FI
 
+FUN computePosition : seq[seq[string]] ** alignment ** real ** metrics -> seq[seq[point]]
+DEF computePosition (<>, _, _, _)                   == <>
+DEF computePosition (line :: lines, align, y, metr) ==
+    LET
+        yNew == y + height(metr) + lineskip(metr)
+        gl   == glue(line, metr, align)
+    IN
+        posLine(line, left'Settings, y, align, metr, gl) ::
+        computePosition(lines, align, yNew, metr)
+
+FUN posLine : seq[string] ** real ** real ** alignment ** metrics ** real -> seq[point]
+DEF posLine(<>            , _, _, left   , _   , _ ) == <>
+DEF posLine(<>            , _, _, justify, _   , _ ) == <>
+DEF posLine(word :: rWords, x, y, left   , metr, gl) ==
+    LET
+        xNew == x + width(word, metr) + gl
+    IN
+        (x @ y) :: posLine(rWords, xNew, y, left, metr, gl)
+DEF posLine(words, x, y, right, metr, gl) ==
+    LET
+        letters == allWordsNeeded(words, metr)
+        allGlue == gl * asReal(#(words) - 1)
+        space   == x + (pageWidth - (letters + allGlue))
+    IN
+        posLine(words, space, y, left, metr, gl)
+DEF posLine(words, x, y, center, metr, gl) ==
+    LET
+        letters == allWordsNeeded(words, metr)
+        allGlue == gl * asReal(#(words) - 1)
+        space   == x + ((pageWidth - (letters + allGlue)) / 2)
+    IN
+        posLine(words, space, y, left, metr, gl)
+DEF posLine(word::rWords, x, y, justify, metr, gl) ==
+    LET
+        xNew == x + width(word, metr) + gl
+    IN
+        (x @ y) :: posLine(rWords, xNew, y, justify, metr, gl)
+
+/*
+ * Zipping words and positions to data
+ */
+-- Zeilen in Paragraph
+FUN zip2dataPar : seq[seq[string]] ** seq[seq[point]] -> para
+DEF zip2dataPar (<>, _)            == para(<>)
+DEF zip2dataPar (t :: rt, p :: rp) == zip2dataPar(rt, rp) <* zip2dataLine(t, p)
+
+-- Wörter pro Zeile
+FUN zip2dataLine : seq[string] ** seq[point] -> line
+DEF zip2dataLine (<>, _)      == line(<>)
+DEF zip2dataLine (t::T, p::P) == zip2dataLine(T, P) << posWord(t, p)
+
+/*
+ * Widths
+ */
+FUN width : string ** metrics -> real
+DEF width (word, metr) == width
+    WHERE
+        (width, height) == dimensions(metr)(`(word))
+
+FUN allWordsNeeded : seq[string] ** metrics -> real
+DEF allWordsNeeded(words, metr) == reduce(+, 0)(map(width(_, metr))(words))
+
+FUN glue : seq[string] ** metrics ** alignment -> real
+DEF glue(words, metr, align) ==
+    IF justify?(align) THEN (pageWidth - allWordsNeeded(words, metr)) / asReal(#(words) - 1)
+                       ELSE width(!(" "), metr) FI
+
 FUN pageWidth : real
 DEF pageWidth == canvasWidth'Settings - (2 * margin'Settings)
-
-FUN glue : metrics -> real
-DEF glue (metr) == width(!(" "), metr)

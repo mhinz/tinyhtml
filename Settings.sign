@@ -8,8 +8,6 @@ FUN size       : size
 FUN font       : font
 FUN alignment  : denotation
 
-FUN title      : denotation
-
 FUN foreground : color
 FUN background : color
 

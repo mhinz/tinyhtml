@@ -5,8 +5,7 @@ IMPORT Seq       ONLY :: ++
        SeqReduce ONLY /
 
 DATA posWord == posWord(text     : string,
-                        position : point,
-                        width    : real)
+                        position : point)
 
 DATA line == <>
              line(words: seq[posWord])
