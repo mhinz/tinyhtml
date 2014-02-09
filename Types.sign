@@ -1,9 +1,13 @@
 SIGNATURE Types
 
+-- IMPORTS {{{1
+
 IMPORT Seq       ONLY seq
        String    ONLY string
        Real      ONLY real
        WinConfig ONLY point
+
+-- DATA TYPES {{{1
 
 TYPE posWord == posWord(text     : string,
                         position : point)
@@ -13,6 +17,8 @@ TYPE line == <>
 
 TYPE para == <>
              para(lines: seq[line])
+
+-- EXPORTS {{{1
 
 FUN << : line ** posWord -> line
 FUN ++ : line ** line    -> line

@@ -1,9 +1,13 @@
 SIGNATURE Parser
 
+-- IMPORTS {{{1
+
 IMPORT String ONLY string
        Seq    ONLY seq
 
        Syntax COMPLETELY
        Token  ONLY token
+
+-- GLOBAL FUNCTIONS {{{1
 
 FUN parse : seq[token] -> html ** seq[token]

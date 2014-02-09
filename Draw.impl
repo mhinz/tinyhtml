@@ -2,53 +2,30 @@ IMPLEMENTATION Draw
 
 -- IMPORTS {{{1
 
-IMPORT Seq             COMPLETELY
-       SeqMap          COMPLETELY
-       Denotation      COMPLETELY
-       Com             COMPLETELY
-       Void            COMPLETELY
-       Nat             COMPLETELY
-       Real            COMPLETELY
-       String          COMPLETELY
-       RealConv        COMPLETELY
-       NatConv         COMPLETELY
+IMPORT Seq             ONLY ::
+       Compose         ONLY o
 
-       ProcessArgs     COMPLETELY
-       WinButton       COMPLETELY
-       WinCanvas       COMPLETELY
-       WinCanvasEditor COMPLETELY
+       WinCanvasEditor ONLY drawing {} display text with ++
        WinConfig       COMPLETELY
-       WinEmitter      COMPLETELY
-       WinWindow       COMPLETELY
-       WinView         COMPLETELY
 
-       Dot             COMPLETELY
-       Settings        COMPLETELY
-       Layout          COMPLETELY
+       Settings        ONLY font foreground
        Types           ONLY line
 
 -- GLOBAL FUNCTIONS {{{1
 
 /*
- * Example input.
- */
-DEF sample == %(
-                %(!("Hinter"), !("dir!")                     ),
-                %(!("Ein"),    !("dreikoepfiger"), !("Affe!"))
-               )
-
-/*
  * Draw the display.
  */
-DEF draw(edit, hugeline, metr) == display(edit, hugeline.lineToDrawing)
+DEF draw(edit, hugeline, metr) == display(edit, lineToDrawing(hugeline))
 
 -- LOCAL FUNCTIONS {{{1
 
 FUN lineToDrawing : line -> drawing
 DEF lineToDrawing (<>)         == {}
 DEF lineToDrawing (line(<>))   == {}
-DEF lineToDrawing (line(w::W)) == lineToDrawing(line(W)) ++ (text(w.position) with
-                                                            (text      (w.text)        ++
-                                                             anchor    (west)          ++
-                                                             font      (font'Settings) ++
-                                                             foreground(foreground'Settings)))
+DEF lineToDrawing (line(w::W)) ==
+    lineToDrawing(line(W)) ++ (text(position(w)) with
+                              (text      (text(w))       ++
+                               anchor    (west)          ++
+                               font      (font'Settings) ++
+                               foreground(foreground'Settings)))

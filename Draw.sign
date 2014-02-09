@@ -1,16 +1,18 @@
 SIGNATURE Draw
 
+-- IMPORTS {{{1
+
 IMPORT Com             ONLY com
        Void            ONLY void
-       Real            ONLY real
-       Seq             ONLY seq
        String          ONLY string
+       Seq             ONLY seq
+
        WinCanvasEditor ONLY canvasEditor
        WinConfig       ONLY point
        WinFontMetrics  ONLY metrics
 
-       Syntax          COMPLETELY
        Types           ONLY posWord line
 
-FUN draw   : canvasEditor ** line ** metrics -> com[void]
-FUN sample : seq[seq[string]]
+-- EXPORTS {{{1
+
+FUN draw : canvasEditor ** line ** metrics -> com[void]

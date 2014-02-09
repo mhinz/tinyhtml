@@ -1,5 +1,7 @@
 SIGNATURE Layout
 
+-- IMPORTS {{{1
+
 IMPORT Seq            ONLY seq
        String         ONLY string
        Real           ONLY real
@@ -8,5 +10,7 @@ IMPORT Seq            ONLY seq
 
        Types          ONLY posWord line
        Syntax         COMPLETELY
+
+-- EXPORTS {{{1
 
 FUN computeLayout : seq[par] ** metrics -> line

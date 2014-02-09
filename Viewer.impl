@@ -1,5 +1,7 @@
 IMPLEMENTATION Viewer
 
+-- IMPORTS {{{1
+
 IMPORT Void            COMPLETELY
        Nat             COMPLETELY
        NatConv         COMPLETELY
@@ -16,10 +18,11 @@ IMPORT Void            COMPLETELY
        WinCanvas       COMPLETELY
        WinCanvasEditor COMPLETELY
        WinConfig       COMPLETELY
-       WinEmitter      COMPLETELY
-       WinView         COMPLETELY
-       WinWindow       COMPLETELY
-       WinFontMetrics  COMPLETELY
+       WinEmitter      ONLY emitter bind await
+       WinInternal     ONLY wconfig wconfigCom
+       WinView         ONLY ^^
+       WinWindow       ONLY window titleName grab release set delete
+       WinFontMetrics  ONLY metrics fontMetrics
 
        Com             ONLY succeed exit
        ComCheck        ONLY |
@@ -29,28 +32,59 @@ IMPORT Void            COMPLETELY
        BasicIO         ONLY writeLine
        File            ONLY file open close readLines
 
-       Settings        COMPLETELY
-       Dot             COMPLETELY
-       Draw            COMPLETELY
-       Layout          COMPLETELY
+       Settings        ONLY font size foreground background
+       Draw            ONLY draw
+       Layout          ONLY computeLayout
+       Types           ONLY line posWord
        Syntax          COMPLETELY
        Token           ONLY token
        Scanner         ONLY scan
        Parser          ONLY parse
        Eval            ONLY eval
 
+-- DATA TYPES {{{1
+
 DATA gui == gui(edit : canvasEditor,
                 emit : emitter[action])
 
 DATA action == exit
 
-/*
- * Entry point.
- */
+-- GLOBAL FUNCTIONS {{{1
+
 DEF viewer ==
     argCount & (\\nargs.
     IF nargs |= 2 THEN arg(0) & usage
                   ELSE init FI)
+
+-- LOCAL FUNCTIONS {{{1
+
+/*
+ * Initialize everything.
+ */
+FUN init : com[void]
+DEF init ==
+    arg(1)                                 &
+    readFile                               &
+    buildAST                               & (\\ast.
+    initializeGui                          & (\\gui.
+    getTitle(ast)                          & (\\title.
+    setupWindow(gui, title)                & (\\win.
+    fontMetrics(font'Settings)             & (\\metr.
+    eval(ast, metr)                        & (\\hugeline.
+    draw'Draw(edit(gui), hugeline, metr)   &
+    handleEmits(gui, win)))))))
+
+FUN buildAST : string -> com[html]
+DEF buildAST (htmlstring) ==
+    LET
+        (ast, rest) == parse(scan(htmlstring))
+    IN
+        IF <>?(rest) THEN succeed(ast)
+                     ELSE writeLine("[!] Parsing failed.") &
+                          exit(1) FI
+
+FUN getTitle : html -> com[denotation]
+DEF getTitle (html(title, _)) == succeed(reduce(++, <>, content(title))`)
 
 /*
  * Is shown when the wrong number of arguments
@@ -72,34 +106,6 @@ DEF readFile (path) ==
     succeed(/(++, <>, lines)))))
 
 /*
- * Initialize everything.
- */
-FUN init : com[void]
-DEF init ==
-    arg(1)                                 &
-    readFile                               &
-    buildAST                               & (\\ast.
-    initializeGui                          & (\\gui.
-    getTitle(ast)                          & (\\title.
-    setupWindow(gui, title)                & (\\win.
-    fontMetrics(font'Settings)             & (\\metr.
-    eval(ast, metr)                        & (\\hugeline.
-    draw'Draw(gui.edit, hugeline, metr)    &
-    handleEmits(gui, win)))))))
-
-FUN buildAST : string -> com[html]
-DEF buildAST (htmlstring) ==
-    LET
-        (ast, rest) == parse(scan(htmlstring))
-    IN
-        IF <>?(rest) THEN succeed(ast)
-                     ELSE writeLine("[!] Parsing failed.") &
-                          exit(1) FI
-
-FUN getTitle : html -> com[denotation]
-DEF getTitle (html(title, _)) == succeed(reduce(++, <>, content(title))`)
-
-/*
  * GUI.
  */
 FUN initializeGui : com[gui]
@@ -109,6 +115,9 @@ DEF initializeGui ==
     emitter                            & (\\emit.
     succeed(gui(edit, emit)))))
 
+/*
+ * Prepare window.
+ */
 FUN setupWindow : gui ** denotation -> com[window]
 DEF setupWindow (gui, title) ==
     writeLine("[*] Setup window..") & (\\ _ .
@@ -118,7 +127,7 @@ DEF setupWindow (gui, title) ==
     succeed(win))))
 
 FUN frame : gui -> view
-DEF frame (gui) == pad(gui.edit) ^^ exitButton(gui.emit)
+DEF frame (gui) == pad(edit(gui)) ^^ exitButton(emit(gui))
 
 FUN pad : canvasEditor -> view
 DEF pad (editor) ==
@@ -130,10 +139,14 @@ DEF pad (editor) ==
 FUN exitButton : emitter[action] -> view
 DEF exitButton (emit) == button with (bind(emit, exit) ++
                                       text("Beenden"))
+
+/*
+ * Event handler.
+ */
 FUN handleEmits : gui ** window -> com[void]
 DEF handleEmits (gui, win) ==
     writeLine("[*] Register events..") & (\\ _ .
-    await(gui.emit)                    & (\\act.
+    await(emit(gui))                   & (\\act.
     IF exit?(act) THEN
         release(win)                   &
         delete(win)                    &

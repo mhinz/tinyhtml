@@ -1,6 +1,10 @@
 SIGNATURE Viewer
 
+-- IMPORTS {{{1
+
 IMPORT Com  ONLY com
        Void ONLY void
+
+-- EXPORTS {{{1
 
 FUN viewer : com[void]

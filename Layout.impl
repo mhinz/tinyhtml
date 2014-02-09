@@ -2,26 +2,28 @@ IMPLEMENTATION Layout
 
 -- IMPORTS {{{1
 
-IMPORT WinFontMetrics  COMPLETELY
-       WinConfig       COMPLETELY
-       Real            COMPLETELY
-       Nat             COMPLETELY
-       NatConv         COMPLETELY
-       String          COMPLETELY
-       StringConv      COMPLETELY
+IMPORT Real           COMPLETELY
+       Nat            ONLY 0 1 + -
+       NatConv        ONLY asReal
+       String         ONLY !
+       StringConv     ONLY `
 
-       Seq             COMPLETELY
-       SeqMap          ONLY map
-       SeqReduce       ONLY reduce
+       Seq            ONLY <> :: # split
+       SeqMap         ONLY map
+       SeqReduce      ONLY reduce
 
-       Settings        COMPLETELY
-       Dot             COMPLETELY
-       Types           COMPLETELY
+       WinFontMetrics ONLY lineskip height dimensions
+       WinConfig      COMPLETELY
+
+       Settings       ONLY top left canvasWidth margin
+       Types          COMPLETELY
 
 -- GLOBAL FUNCTIONS {{{1
 
 DEF computeLayout (<>, _)      == <>
 DEF computeLayout (pars, metr) == flatLine(lines(flatPara(layPar(pars, top'Settings, metr))))
+
+-- LOCAL FUNCTIONS {{{1
 
 FUN layPar : seq[par] ** real ** metrics -> seq[para]
 DEF layPar (<>, _, _)                             == <>

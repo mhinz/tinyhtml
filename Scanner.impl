@@ -1,5 +1,7 @@
 IMPLEMENTATION Scanner
 
+-- IMPORTS {{{1
+
 IMPORT Bool         ONLY or
        Char         ONLY char whitespace? ! =
        Denotation   ONLY ++ empty
@@ -11,10 +13,14 @@ IMPORT Bool         ONLY or
        SeqMap       ONLY map
        SeqReduce    ONLY reduce
 
+-- GLOBAL FUNCTIONS {{{1
+
 /*
  * Scanning = Partitioning + Translating.
  */
 DEF scan (s) == (translate o partition)(s)
+
+-- LOCAL FUNCTIONS {{{1
 
 /*
  * Partition string into its lexemes.

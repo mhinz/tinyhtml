@@ -1,9 +1,13 @@
 SIGNATURE Scanner
 
+-- IMPORTS {{{1
+
 IMPORT String ONLY string
        Seq    ONLY seq
 
        Token  COMPLETELY
+
+-- EXPORTS {{{1
 
 FUN scan       : string -> seq[token]
 

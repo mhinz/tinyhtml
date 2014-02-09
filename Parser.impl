@@ -1,14 +1,13 @@
 IMPLEMENTATION Parser
 
+-- IMPORTS {{{1
+
 IMPORT Bool    ONLY or
        Seq     ONLY :: <> % empty?
 
-       Scanner ONLY scanTests scanOutput
        Token   COMPLETELY
 
-FUN error? : seq[token] -> bool
-DEF error? (error :: _) == true
-DEF error? (_)          == false
+-- GLOBAL FUNCTIONS {{{1
 
 /*
  * Parse tokens into abstract syntax tree.
@@ -22,6 +21,8 @@ DEF parse (tokens) ==
     IN
         IF empty?(r4) THEN (html(title, body), r4)
                       ELSE (fail, r4) FI
+
+-- LOCAL FUNCTIONS {{{1
 
 /*
  * Parse opening tags.
@@ -44,6 +45,9 @@ DEF parseCloseTag (t :: rest) ==
        closePar?  (t) THEN rest
                       ELSE error :: (t :: rest) FI
 
+/*
+ * Parse title.
+ */
 FUN parseTitle : seq[token] -> title ** seq[token]
 DEF parseTitle (tokens) ==
     LET
@@ -54,6 +58,9 @@ DEF parseTitle (tokens) ==
         IF error?(r3) THEN (fail, r3)
                       ELSE (title(words), r3) FI
 
+/*
+ * Parse words.
+ */
 FUN parseWords : seq[token] -> seq[string] ** seq[token]
 DEF parseWords (token :: rest) ==
     IF word?(token) THEN
@@ -62,8 +69,11 @@ DEF parseWords (token :: rest) ==
                         IN
                             (data(token) :: words, r1)
                     ELSE
-                        (<>, token :: rest) FI -- XXX
+                        (<>, token :: rest) FI
 
+/*
+ * Parse body.
+ */
 FUN parseBody : seq[token] -> body ** seq[token]
 DEF parseBody (tokens) ==
     LET
@@ -74,6 +84,9 @@ DEF parseBody (tokens) ==
         IF error?(r3) THEN (fail, r3)
                       ELSE (body(pars), r3) FI
 
+/*
+ * Parse paragraphs.
+ */
 FUN parsePars : seq[token] -> seq[par] ** seq[token]
 DEF parsePars (token :: rest) ==
     IF openPar?(token) THEN
@@ -85,6 +98,9 @@ DEF parsePars (token :: rest) ==
                        ELSE
                            (<>, token :: rest) FI
 
+/*
+ * Parse opening paragraphs.
+ */
 FUN openPar? : token -> bool
 DEF openPar? (token) ==
     openParLeft?   (token) or
@@ -92,6 +108,9 @@ DEF openPar? (token) ==
     openParCenter? (token) or
     openParJustify?(token)
 
+/*
+ * Parse a paragraph.
+ */
 FUN parsePar : seq[token] -> par ** seq[token]
 DEF parsePar (<>)                  == (fail, %(error))
 DEF parsePar (openParLeft :: rest) ==
@@ -123,3 +142,7 @@ DEF parsePar (openParJustify :: rest) ==
         IF error?(r2) THEN (fail, r2)
                       ELSE (par(words, justify), r2) FI
 DEF parsePar (tokens) == (fail, error :: tokens)
+
+FUN error? : seq[token] -> bool
+DEF error? (error :: _) == true
+DEF error? (_)          == false

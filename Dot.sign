@@ -1,6 +1,0 @@
-SIGNATURE Dot[a, b]
-
-SORT a
-SORT b
-
-FUN . : a ** (a -> b) -> b

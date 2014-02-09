@@ -1,8 +1,11 @@
 IMPLEMENTATION Types
 
+-- IMPORTS {{{1
+
 IMPORT Seq       ONLY :: ++
-       Dot       ONLY .
        SeqReduce ONLY /
+
+-- DATA TYPES {{{1
 
 DATA posWord == posWord(text     : string,
                         position : point)
@@ -13,15 +16,17 @@ DATA line == <>
 DATA para == <>
              para(lines: seq[line])
 
+-- GLOBAL FUNCTIONS {{{1
+
 /*
  * Put "posWord" into "line".
  * Put "line" into "par".
  */
 DEF (line(<>)) << (e) == line(e :: <>)
-DEF (l)        << (e) == line(e :: l.words)
+DEF (l)        << (e) == line(e :: words(l))
 
 DEF (para(<>)) <* (e) == para(e :: <>)
-DEF (p)        <* (e) == para(e :: p.lines)
+DEF (p)        <* (e) == para(e :: lines(p))
 
 /*
  * Concatenate lines.

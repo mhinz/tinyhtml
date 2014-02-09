@@ -1,5 +1,7 @@
 IMPLEMENTATION Syntax
 
+-- DATA TYPES {{{1
+
 DATA html      == fail
                   html(title : title,
                        body  : body)
